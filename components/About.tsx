@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
 import Image from "next/image";
 
 const chapters = [
@@ -36,44 +36,46 @@ export default function About() {
   return (
     <section ref={containerRef} className="relative bg-obsidian">
       
-      {/* DESKTOP LAYOUT (Split Screen) */}
+      {/* DESKTOP LAYOUT */}
       <div className="hidden md:flex">
         
         {/* LEFT COLUMN: STICKY CONTENT */}
-        {/* Changed max-w-xl to max-w-3xl and reduced padding slightly to give text more room */}
-        <div className="w-1/2 h-screen sticky top-0 flex items-center justify-center p-8 lg:p-12 z-10">
-          <div className="max-w-3xl relative w-full px-6"> 
+        <div className="w-1/2 h-screen sticky top-0 flex items-center justify-center p-12 z-10">
+          
+          {/* THE PROGRESS LINE - Visual Continuity */}
+          <div className="absolute left-12 top-1/2 -translate-y-1/2 h-[60%] w-[1px] bg-white/10 hidden lg:block">
+            <motion.div 
+              style={{ scaleY: scrollYProgress }} 
+              className="w-full h-full bg-gold origin-top"
+            />
+          </div>
+
+          <div className="max-w-2xl relative w-full pl-10"> 
             {chapters.map((chapter, index) => {
               const rangeStart = index * (1 / chapters.length);
               const rangeEnd = (index + 1) * (1 / chapters.length);
               
+              // More precise timing for the text reveal
               // eslint-disable-next-line react-hooks/rules-of-hooks
-              const opacity = useTransform(
-                scrollYProgress,
-                [rangeStart, rangeStart + 0.1, rangeEnd - 0.1, rangeEnd],
-                [0, 1, 1, 0]
-              );
-              
+              const opacity = useTransform(scrollYProgress, [rangeStart, rangeStart + 0.1, rangeEnd - 0.2, rangeEnd], [0, 1, 1, 0]);
               // eslint-disable-next-line react-hooks/rules-of-hooks
-              const y = useTransform(
-                scrollYProgress,
-                [rangeStart, rangeStart + 0.1, rangeEnd - 0.1, rangeEnd],
-                [50, 0, 0, -50]
-              );
+              const y = useTransform(scrollYProgress, [rangeStart, rangeStart + 0.1, rangeEnd - 0.2, rangeEnd], [20, 0, 0, -20]);
 
               return (
                 <motion.div 
                   key={index} 
-                  style={{ opacity, y }}
-                  className="absolute inset-0 top-1/2 -translate-y-1/2 w-full"
+                  style={{ opacity, y, display: index === 0 ? 'block' : undefined }} // Ensure first is visible initially if needed
+                  className={`absolute inset-0 top-1/2 -translate-y-1/2 w-full flex flex-col justify-center ${index !== 0 ? '' : ''}`}
                 >
-                  <p className="text-gold text-sm tracking-[0.3em] uppercase mb-6 font-sans">
-                    {chapter.subtitle}
-                  </p>
-                  <h2 className="text-6xl lg:text-8xl font-serif text-cream mb-10 leading-[0.9]">
+                  <motion.p className="text-gold text-xs tracking-[0.4em] uppercase mb-6 font-sans border-l-2 border-gold pl-4">
+                    0{index + 1} &mdash; {chapter.subtitle}
+                  </motion.p>
+                  
+                  <h2 className="text-6xl lg:text-7xl font-serif text-cream mb-8 leading-[1]">
                     {chapter.title}
                   </h2>
-                  <p className="text-gray-400 text-xl lg:text-2xl font-light leading-relaxed font-sans max-w-2xl">
+                  
+                  <p className="text-gray-400 text-lg font-light leading-relaxed font-sans max-w-lg">
                     {chapter.description}
                   </p>
                 </motion.div>
@@ -82,30 +84,10 @@ export default function About() {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: SCROLLING IMAGES */}
+        {/* RIGHT COLUMN: SCROLLING IMAGES WITH PARALLAX */}
         <div className="w-1/2">
           {chapters.map((chapter, index) => (
-            <div key={index} className="h-screen w-full relative flex items-center justify-center border-l border-white/5 bg-neutral-900 overflow-hidden">
-               <motion.div 
-                 initial={{ scale: 1.2 }}
-                 whileInView={{ scale: 1 }}
-                 transition={{ duration: 1.5, ease: "easeOut" }}
-                 className="relative w-[80%] h-[70%] grayscale hover:grayscale-0 transition-all duration-1000 ease-in-out"
-               >
-                 <Image
-                   src={chapter.image}
-                   alt={chapter.title}
-                   fill
-                   className="object-cover"
-                 />
-                 <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-transparent to-obsidian opacity-60" />
-                 <div className="absolute inset-0 mix-blend-multiply bg-amber-900/20" />
-               </motion.div>
-               
-               <div className="absolute bottom-10 right-10 text-[10rem] font-serif text-white/5 leading-none select-none">
-                 0{index + 1}
-               </div>
-            </div>
+             <ParallaxImage key={index} src={chapter.image} alt={chapter.title} index={index} />
           ))}
         </div>
       </div>
@@ -113,23 +95,63 @@ export default function About() {
       {/* MOBILE LAYOUT */}
       <div className="md:hidden">
         {chapters.map((chapter, index) => (
-           <div key={index} className="min-h-screen py-20 px-6 flex flex-col justify-center border-b border-white/5">
-             <div className="mb-10 relative h-[300px] w-full overflow-hidden grayscale">
-               <Image
-                 src={chapter.image}
-                 alt={chapter.title}
-                 fill
-                 className="object-cover"
-               />
-               <div className="absolute inset-0 bg-black/20" />
-             </div>
-             <p className="text-gold text-xs tracking-widest uppercase mb-2">{chapter.subtitle}</p>
-             <h2 className="text-5xl font-serif text-cream mb-6">{chapter.title}</h2>
-             <p className="text-gray-400 font-light leading-relaxed">{chapter.description}</p>
-           </div>
+            <div key={index} className="min-h-screen py-20 px-6 flex flex-col justify-center border-b border-white/5 bg-obsidian">
+              <div className="mb-10 relative h-[400px] w-full overflow-hidden">
+                <Image
+                  src={chapter.image}
+                  alt={chapter.title}
+                  fill
+                  className="object-cover grayscale"
+                />
+                <div className="absolute inset-0 bg-black/20" />
+              </div>
+              <p className="text-gold text-xs tracking-widest uppercase mb-4">0{index + 1} / {chapter.subtitle}</p>
+              <h2 className="text-5xl font-serif text-cream mb-6">{chapter.title}</h2>
+              <p className="text-gray-400 font-light leading-relaxed">{chapter.description}</p>
+            </div>
         ))}
       </div>
       
     </section>
+  );
+}
+
+// Sub-component for the Parallax Effect on Images
+function ParallaxImage({ src, alt, index }: { src: string, alt: string, index: number }) {
+  const ref = useRef(null);
+  
+  // Track this specific image container
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"]
+  });
+
+  // The image moves slightly SLOWER than the scroll, creating depth
+  const y = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
+  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [1.1, 1, 1.1]);
+
+  return (
+    <div ref={ref} className="h-screen w-full relative flex items-center justify-center border-l border-white/5 bg-neutral-900 overflow-hidden">
+        
+       {/* Mask Container */}
+       <div className="relative w-[80%] h-[70%] overflow-hidden">
+         <motion.div style={{ y, scale }} className="relative w-full h-full grayscale hover:grayscale-0 transition-all duration-700">
+            <Image
+              src={src}
+              alt={alt}
+              fill
+              className="object-cover"
+            />
+         </motion.div>
+         
+         {/* Overlays */}
+         <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-transparent to-transparent opacity-40 pointer-events-none" />
+       </div>
+
+       {/* Large Background Number */}
+       <div className="absolute bottom-20 right-10 text-[12rem] font-serif text-white/[0.03] leading-none select-none pointer-events-none">
+         0{index + 1}
+       </div>
+    </div>
   );
 }

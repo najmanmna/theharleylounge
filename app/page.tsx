@@ -10,6 +10,7 @@ import Footer from "@/components/Footer";
 import Loader from "@/components/Loader";
 import Secret from "@/components/Secret";
 import Manifesto from "@/components/Manifesto";
+import Events from "./events/page";
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
@@ -36,6 +37,7 @@ export default function Home() {
           <Amenities />
         </div>
         <Gallery />
+        {/* <Events /> */}
         <div id="contact">
           <Footer />
         </div>
