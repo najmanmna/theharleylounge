@@ -1,26 +1,73 @@
 @import "tailwindcss";
 
+/* 1. Define the Core Variables */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* We enforce the dark theme values as default */
+  --background: #050505; /* Obsidian */
+  --foreground: #f5f5f5; /* Cream */
+  
+  /* Font Variables will be injected by next/font in layout.tsx */
+  /* These fallbacks ensure no layout shift */
+  --font-manrope: ui-sans-serif, system-ui, sans-serif;
+  --font-cinzel: ui-serif, Georgia, serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* 2. Configure the Design System */
+@theme {
+  /* Colors */
+  --color-obsidian: #050505;
+  --color-charcoal: #0a0a0a;
+  
+  --color-gold: #D4AF37;
+  --color-gold-dim: #aa8c2c;
+  --color-gold-light: #f3e5ab;
+  
+  --color-cream: #f5f5f5;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  /* Fonts */
+  --font-sans: var(--font-manrope);
+  --font-serif: var(--font-cinzel);
+
+  /* Animations */
+  --animate-fade-in: fade-in 0.8s ease-out forwards;
+  --animate-slow-pan: pan 20s linear infinite;
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 }
 
+/* 3. Global Reset & Utilities */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  overflow-x: hidden; /* Crucial for animations */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Luxury Selection (Gold Highlight) */
+::selection {
+  background: var(--color-gold);
+  color: var(--color-obsidian);
+}
+
+/* Utility to hide scrollbars but keep functionality */
+@utility no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Utility for the "Moody" Vignette */
+@utility luxury-vignette {
+  background: linear-gradient(
+    to bottom,
+    rgba(5, 5, 5, 0) 0%,
+    rgba(5, 5, 5, 0.5) 50%,
+    rgba(5, 5, 5, 1) 100%
+  );
 }
