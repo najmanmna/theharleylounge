@@ -1,34 +1,31 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion"; // <--- 1. Import Variants
 import { useEffect, useState } from "react";
 
 export default function Loader({ onComplete }: { onComplete: () => void }) {
   const [isFinished, setIsFinished] = useState(false);
 
   useEffect(() => {
-    // 1. Lock scroll immediately on mount
     document.body.style.overflow = "hidden";
     
-    // 2. Wait for logo animation (approx 2.8s) then lift curtain
     const timer = setTimeout(() => {
         setIsFinished(true);
     }, 2800);
 
     return () => {
       clearTimeout(timer);
-      // 3. SAFETY CLEANUP: Force unlock on unmount
       document.body.style.overflow = "auto";
     };
   }, []);
 
   const handleAnimationComplete = () => {
-    // 4. TRIGGER CLEANUP: Unlock scroll when animation finishes
     document.body.style.overflow = "auto";
     onComplete();
   };
 
-  const draw = {
+  // 2. Add the ': Variants' type annotation here
+  const draw: Variants = {
     hidden: { pathLength: 0, opacity: 0 },
     visible: (i: number) => ({
       pathLength: 1,
