@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, Variants } from "framer-motion";
 
 const content = `We are not just a club. We are a sanctuary for the curious, the brave, and the bold. 
 In a city of noise, we offer silence. In a world of digital connections, we offer a handshake. 
@@ -12,32 +12,33 @@ const highlights = ["sanctuary", "curious,", "brave,", "bold.", "silence.", "han
 
 export default function Manifesto() {
   const container = useRef(null);
-  // Trigger animation when 20% of the component is visible
   const isInView = useInView(container, { amount: 0.2, once: true });
 
   const words = content.split(" ");
 
-  const containerVariants = {
+  // Added ': Variants' type to prevent inference errors
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.02, // Fast, smooth stagger
+        staggerChildren: 0.02,
         delayChildren: 0.1
       }
     }
   };
 
-  const wordVariants = {
+  // Added ': Variants' type here as well
+  const wordVariants: Variants = {
     hidden: { 
       opacity: 0.1, 
       y: 10,
-      filter: "blur(4px)" // Keep blur in initial state (cheap)
+      filter: "blur(4px)" 
     },
     visible: { 
       opacity: 1, 
       y: 0,
-      filter: "blur(0px)", // Remove blur on animate (cheap)
+      filter: "blur(0px)",
       transition: {
         duration: 0.5,
         ease: "easeOut"
