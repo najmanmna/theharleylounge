@@ -31,14 +31,19 @@ export default function Hero() {
 
   // Smooth out the mouse movement so it feels like floating in water
   const smoothX = useSpring(mouseX, { damping: 50, stiffness: 400 });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const smoothY = useSpring(mouseY, { damping: 50, stiffness: 400 });
 
-  const handleMouseMove = (e) => {
+  // FIX: Added Type Definition here
+  const handleMouseMove = (e: React.MouseEvent) => {
     const { clientX, clientY } = e;
-    const { innerWidth, innerHeight } = window;
-    // Calculate movement relative to center (ranges from -20 to 20 pixels)
-    mouseX.set((clientX / innerWidth - 0.5) * -30);
-    mouseY.set((clientY / innerHeight - 0.5) * -30);
+    // Check if window is defined (safe guard for SSR)
+    if (typeof window !== "undefined") {
+        const { innerWidth, innerHeight } = window;
+        // Calculate movement relative to center (ranges from -20 to 20 pixels)
+        mouseX.set((clientX / innerWidth - 0.5) * -30);
+        mouseY.set((clientY / innerHeight - 0.5) * -30);
+    }
   };
 
   const handleVideoEnd = () => {
@@ -136,17 +141,19 @@ export default function Hero() {
           </m.p>
 
           {/* Interactive Button */}
-          <m.button
+          <m.a
+            href="https://apply.theharleylounge.com/"
+            target="_blank"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.8, duration: 1 }}
             whileHover={{ scale: 1.05, borderColor: "rgba(238, 187, 77, 0.4)" }}
             whileTap={{ scale: 0.95 }}
             className="mt-12 px-8 py-4 border border-[#eebb4d]/20 text-[#eebb4d]/80 text-[10px] uppercase tracking-[0.3em] 
-                       hover:bg-[#eebb4d]/5 hover:text-[#eebb4d] transition-all duration-500 backdrop-blur-sm"
+                       hover:bg-[#eebb4d]/5 hover:text-[#eebb4d] transition-all duration-500 backdrop-blur-sm inline-block cursor-pointer"
           >
             Request Access
-          </m.button>
+          </m.a>
         </m.div>
 
         {/* --- LAYER 3: Scroll Indicator --- */}
