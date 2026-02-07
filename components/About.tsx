@@ -25,7 +25,7 @@ const chapters = [
     title: "The Community",
     subtitle: "Distinguished Company",
     description: "Where distinguished medical professionals and visionary creatives converge. A space curated for connection, conversation, and the exchange of brilliant ideas.",
-    image: "https://events.theharleylounge.com/wp-content/uploads/2025/10/P1430162-1.jpg",
+    image: "/about3.webp",
     accent: "from-[#050505] to-[#0f0f1a]", // Midnight Blue
     id: "03"
   }
