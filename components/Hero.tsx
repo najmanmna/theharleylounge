@@ -33,16 +33,18 @@ export default function Hero() {
   const smoothX = useSpring(mouseX, { damping: 60, stiffness: 200 }); 
   const smoothY = useSpring(mouseY, { damping: 60, stiffness: 200 });
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    const { clientX, clientY } = e;
-    if (typeof window !== "undefined") {
-        const { innerWidth, innerHeight } = window;
-        // Reduced movement range (-15 to 15) for subtlety
-        mouseX.set((clientX / innerWidth - 0.5) * -15);
-        mouseY.set((clientY / innerHeight - 0.5) * -15);
-    }
-  };
+const handleMouseMove = (e: React.MouseEvent) => {
+    // 1. Safety Check: Stop if we are on Server (SSR) OR on Mobile (< 768px)
+    if (typeof window === "undefined" || window.innerWidth < 768) return;
 
+    // 2. Run logic only on Desktop
+    const { clientX, clientY } = e;
+    const { innerWidth, innerHeight } = window;
+    
+    // Reduced movement range (-15 to 15) for subtlety
+    mouseX.set((clientX / innerWidth - 0.5) * -15);
+    mouseY.set((clientY / innerHeight - 0.5) * -15);
+  };
   const handleVideoEnd = () => {
     setLoopKey((prev) => prev + 1);
   };

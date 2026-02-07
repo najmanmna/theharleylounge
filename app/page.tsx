@@ -19,7 +19,7 @@ export default function Home() {
   return (
     <main className="bg-obsidian min-h-screen">
       <Secret />
-      
+
       {loading && (
         <Loader onComplete={() => setTimeout(() => setLoading(false), 1000)} />
       )}
@@ -38,7 +38,10 @@ export default function Home() {
           <Amenities />
         </div>
         <Gallery />
-                <div id="membership">        <MembershipSection /></div>
+        <div id="membership">
+          {" "}
+          <MembershipSection />
+        </div>
 
         {/* <Events /> */}
         <div id="contact">

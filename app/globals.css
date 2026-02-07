@@ -2,11 +2,9 @@
 
 /* 1. Define the Core Variables */
 :root {
-  /* CHANGE: Shifted from pitch black to a deep, rich "Midnight Forest" green. 
-     This instantly adds life to the screen. */
+  /* Midnight Forest Green Base */
   --background: #02120b; 
-  
-  /* A slightly warmer "Antique White" is softer on the eyes than pure white */
+  /* Antique White Text */
   --foreground: #eae8dc; 
   
   --font-manrope: ui-sans-serif, system-ui, sans-serif;
@@ -15,23 +13,13 @@
 
 /* 2. Configure the Design System */
 @theme {
-  /* --- The New Vibrant Palette --- */
-  
-  /* The Base: Not black, but a very deep, saturated green-black */
+  /* --- The Vibrant Palette --- */
   --color-obsidian: #02120b; 
-  
-  /* The Lift: A lighter version for cards/modals */
   --color-charcoal: #071f16; 
-  
-  /* The "Vibrant" Highlight: Use this for gradients/glows */
   --color-emerald: #0b3d2e;
-
-  /* The Gold: Punched up saturation to be more "Amber/Honey" than "Brass" */
   --color-gold: #eebb4d; 
   --color-gold-dim: #b88a2d;
   --color-gold-light: #faeab1;
-  
-  /* Keep the text readable */
   --color-cream: #eae8dc;
 
   /* Fonts */
@@ -40,8 +28,7 @@
 
   /* Animations */
   --animate-fade-in: fade-in 0.8s ease-out forwards;
-  --animate-slow-pan: pan 20s linear infinite;
-
+  
   @keyframes fade-in {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
@@ -56,11 +43,11 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   
-  /* ADDED: A subtle ambient light to the whole page so it never feels "dead" */
+  /* Subtle ambient light */
   background-image: 
     radial-gradient(circle at 50% 0%, #0b3d2e33 0%, transparent 60%),
     radial-gradient(circle at 80% 90%, #eebb4d0d 0%, transparent 40%);
-  background-attachment: fixed; /* Keeps the glow in place while scrolling */
+  background-attachment: fixed;
 }
 
 /* Luxury Selection */
@@ -68,6 +55,8 @@ body {
   background: var(--color-gold);
   color: var(--color-obsidian);
 }
+
+/* --- UTILITIES --- */
 
 @utility no-scrollbar {
   -ms-overflow-style: none;
@@ -77,20 +66,45 @@ body {
   }
 }
 
-/* Updated Vignette to fade to the new Green-Black, not pure black */
+/* Optimized Vignette */
 @utility luxury-vignette {
   background: linear-gradient(
     to bottom,
-    rgba(2, 18, 11, 0) 0%,       /* Transparent */
-    rgba(2, 18, 11, 0.4) 40%,    /* Subtle fade */
-    rgba(2, 18, 11, 0.9) 80%,    /* Deep Green-Black */
-    #02120b 100%                 /* Solid Base */
+    rgba(2, 18, 11, 0) 0%,
+    rgba(2, 18, 11, 0.4) 40%,
+    rgba(2, 18, 11, 0.9) 80%,
+    #02120b 100%
   );
 }
 
-/* ADDED: A utility for that "Glowing Glass" look */
+/* Glass Panel */
 @utility glass-panel {
-  background: rgba(7, 31, 22, 0.4); /* Green tint transparency */
+  background: rgba(7, 31, 22, 0.4);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(238, 187, 77, 0.1); /* Subtle Gold Border */
+  border: 1px solid rgba(238, 187, 77, 0.1);
+}
+
+/* Hardware Acceleration Helper */
+@utility will-change-transform {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* --- MOBILE PERFORMANCE OVERRIDES (CRITICAL) --- */
+@media (max-width: 768px) {
+  /* 1. Disable Noise Textures on Mobile to save GPU */
+  [class*="bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"] {
+    display: none !important;
+  }
+
+  /* 2. Disable heavy Blur Filters on Mobile */
+  * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  
+  /* 3. Optional: Allow Navbar to have a solid background instead of blur */
+  nav {
+     background-color: rgba(2, 18, 11, 0.95) !important;
+  }
 }
