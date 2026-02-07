@@ -5,9 +5,20 @@ import { useEffect, useState } from "react";
 
 export default function Loader({ onComplete }: { onComplete: () => void }) {
   const [isFinished, setIsFinished] = useState(false);
+  const [shouldRender, setShouldRender] = useState(true); // Control rendering to avoid flash
 
   useEffect(() => {
-    // Prevent scrolling during load
+    // 1. Check if the user has already seen the loader in this session
+    const hasSeenLoader = sessionStorage.getItem("harley-loader-seen");
+
+    if (hasSeenLoader) {
+      // If yes, skip animation entirely
+      setShouldRender(false);
+      onComplete();
+      return;
+    }
+
+    // 2. If not, play the animation
     document.body.style.overflow = "hidden";
     
     const timer = setTimeout(() => {
@@ -18,12 +29,18 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
       clearTimeout(timer);
       document.body.style.overflow = "auto";
     };
-  }, []);
+  }, [onComplete]);
 
   const handleAnimationComplete = () => {
+    // 3. Save the flag so it doesn't run again
+    sessionStorage.setItem("harley-loader-seen", "true");
+    
     document.body.style.overflow = "auto";
     onComplete();
   };
+
+  // If we shouldn't render (because we've seen it), return null
+  if (!shouldRender) return null;
 
   const draw: Variants = {
     hidden: { pathLength: 0, opacity: 0 },
@@ -37,13 +54,12 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
     }),
   };
 
-  // FIX: Explicitly typed as Variants and cast ease as const to satisfy tuple requirement
   const containerVariants: Variants = {
     exit: {
       y: "-100%",
       transition: {
         duration: 0.8,
-        ease: [0.76, 0, 0.24, 1] as const, // <--- Cast as const fixes the type error
+        ease: [0.76, 0, 0.24, 1] as const,
         when: "afterChildren",
       }
     }
