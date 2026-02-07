@@ -1,33 +1,46 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, useMotionValue, useSpring } from "framer-motion";
+import { motion, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
 
 export default function Cursor() {
   const [isHovering, setIsHovering] = useState(false);
+  const [cursorText, setCursorText] = useState("");
+  const [isVisible, setIsVisible] = useState(false);
   
-  // Mouse position tracking
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
+  const mouseX = useMotionValue(-100);
+  const mouseY = useMotionValue(-100);
 
-  // Smooth "Spring" physics for the lag effect
-  const springConfig = { damping: 25, stiffness: 700 };
+  const springConfig = { damping: 20, stiffness: 300, mass: 0.5 };
   const cursorX = useSpring(mouseX, springConfig);
   const cursorY = useSpring(mouseY, springConfig);
 
   useEffect(() => {
     const moveCursor = (e: MouseEvent) => {
-      mouseX.set(e.clientX - 16); // Center the 32px cursor
-      mouseY.set(e.clientY - 16);
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+      if (!isVisible) setIsVisible(true);
     };
 
-    // Detect hover on clickable elements
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (target.tagName === "BUTTON" || target.tagName === "A" || target.closest("button") || target.closest("a")) {
+      
+      const isClickable = 
+        target.tagName === "BUTTON" || 
+        target.tagName === "A" || 
+        target.closest("button") || 
+        target.closest("a") ||
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA";
+
+      setIsHovering(!!isClickable);
+
+      const customTextNode = target.closest("[data-cursor-text]");
+      if (customTextNode) {
+        setCursorText(customTextNode.getAttribute("data-cursor-text") || "");
         setIsHovering(true);
       } else {
-        setIsHovering(false);
+        setCursorText("");
       }
     };
 
@@ -38,36 +51,76 @@ export default function Cursor() {
       window.removeEventListener("mousemove", moveCursor);
       window.removeEventListener("mouseover", handleMouseOver);
     };
-  }, [mouseX, mouseY]);
+  }, [mouseX, mouseY, isVisible]);
 
   return (
-    <motion.div
-      className="fixed top-0 left-0 w-8 h-8 pointer-events-none z-[9999] mix-blend-difference hidden md:block"
-      style={{
-        x: cursorX,
-        y: cursorY,
-      }}
-    >
-      {/* The Cursor Dot */}
+    <>
+      {/* SAFER GLOBAL STYLE: 
+        Only hide the default cursor on devices that support hovering (pointer: fine).
+        We use pure CSS to ensure the 'custom-cursor' class is the trigger.
+      */}
+      <style jsx global>{`
+        @media (pointer: fine) {
+          body, a, button, input, textarea, select, [role="button"] {
+            cursor: none !important;
+          }
+          /* Ensure the custom cursor is visible on these devices */
+          .custom-cursor {
+            display: flex !important;
+          }
+        }
+        /* Fallback: If not fine pointer (mobile), ensure custom cursor is hidden */
+        @media (pointer: coarse), (pointer: none) {
+          .custom-cursor {
+            display: none !important;
+          }
+        }
+      `}</style>
+
+      {/* 1. THE INNER DOT (Precision Pointer) */}
       <motion.div
-        animate={{
-          scale: isHovering ? 2.5 : 1, // Expands when hovering
-          backgroundColor: isHovering ? "#D4AF37" : "#ffffff", // Turns gold on hover
+        className="custom-cursor fixed top-0 left-0 w-2 h-2 bg-[#eebb4d] rounded-full pointer-events-none z-[9999] hidden mix-blend-normal"
+        style={{
+          x: mouseX,
+          y: mouseY,
+          translateX: "-50%",
+          translateY: "-50%",
+          opacity: isVisible ? 1 : 0
         }}
-        transition={{ duration: 0.2 }}
-        className="w-full h-full rounded-full bg-white opacity-80 backdrop-blur-sm"
       />
-      
-      {/* Optional: Text that appears inside cursor on hover */}
-      {isHovering && (
-        <motion.span
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="absolute inset-0 flex items-center justify-center text-[4px] font-bold text-black uppercase tracking-widest"
-        >
-          View
-        </motion.span>
-      )}
-    </motion.div>
+
+      {/* 2. THE OUTER HALO (Fluid Follower) */}
+      <motion.div
+        className="custom-cursor fixed top-0 left-0 rounded-full pointer-events-none z-[9998] hidden items-center justify-center border border-[#eebb4d]/30"
+        style={{
+          x: cursorX,
+          y: cursorY,
+          translateX: "-50%",
+          translateY: "-50%",
+          opacity: isVisible ? 1 : 0
+        }}
+        animate={{
+          width: isHovering ? 80 : 32,
+          height: isHovering ? 80 : 32,
+          backgroundColor: isHovering ? "rgba(238, 187, 77, 0.05)" : "transparent",
+          borderColor: isHovering ? "rgba(238, 187, 77, 0.5)" : "rgba(238, 187, 77, 0.3)",
+          backdropFilter: isHovering ? "blur(2px)" : "blur(0px)",
+        }}
+        transition={{ duration: 0.4, ease: [0.19, 1, 0.22, 1] }}
+      >
+        <AnimatePresence>
+          {isHovering && cursorText && (
+            <motion.span
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="text-[#eebb4d] text-[8px] uppercase tracking-[0.25em] font-medium text-center leading-tight absolute"
+            >
+              {cursorText}
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </>
   );
 }
