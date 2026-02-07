@@ -9,7 +9,7 @@ const chapters = [
     title: "Hidden Gem",
     subtitle: "In the Heart of Harley Street",
     description: "Welcome to an exclusive haven of tranquillity. Nestled deep within the historic fabric of Cavendish Square, this is not just a lounge—it is London's best-kept secret.",
-    image: "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?q=80&w=1974&auto=format&fit=crop",
+    image: "/harley_street.jpg",
     accent: "from-[#02120b] to-[#052e1f]" // Deep Emerald Gradient
   },
   {

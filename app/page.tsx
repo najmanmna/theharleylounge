@@ -11,6 +11,7 @@ import Loader from "@/components/Loader";
 import Secret from "@/components/Secret";
 import Manifesto from "@/components/Manifesto";
 import Events from "./events/page";
+import MembershipSection from "@/components/Membership";
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
@@ -37,6 +38,8 @@ export default function Home() {
           <Amenities />
         </div>
         <Gallery />
+                <div id="membership">        <MembershipSection /></div>
+
         {/* <Events /> */}
         <div id="contact">
           <Footer />

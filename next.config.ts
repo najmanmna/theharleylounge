@@ -23,6 +23,16 @@ const nextConfig: NextConfig = {
         hostname: 'events.theharleylounge.com',
         pathname: '/**',
       },
+        {
+        protocol: 'https',
+        hostname: 'harleystreetlongevityclub.com',
+        pathname: '/**',
+      },
+         {
+        protocol: 'https',
+        hostname: 'shutterstock.com',
+        pathname: '/**',
+      },
     ],
   },
   reactStrictMode: true, 
