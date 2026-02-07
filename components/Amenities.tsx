@@ -1,12 +1,11 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring, MotionValue } from "framer-motion";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 
 const amenities = [
-  // 1. THE BAR (Social)
   {
     id: "01",
     title: "The Alchemy Bar",
@@ -14,7 +13,6 @@ const amenities = [
     description: "Signature cocktails and light bites served in an atmosphere of shadowed elegance.",
     image: "https://plus.unsplash.com/premium_photo-1670984940156-c7f833fe8397?q=80&w=1170&auto=format&fit=crop",
   },
-  // 2. THE WORKSPACE (Utility)
   {
     id: "02",
     title: "The Study",
@@ -22,7 +20,6 @@ const amenities = [
     description: "A silent sanctuary for the medical elite and creative visionaries to focus.",
     image: "https://plus.unsplash.com/premium_photo-1684769161124-df6a947f7490?q=80&w=716&auto=format&fit=crop",
   },
-  // 3. THE CONCIERGE (Service - Covers "Bespoke Experiences")
   {
     id: "03",
     title: "The Concierge",
@@ -30,7 +27,6 @@ const amenities = [
     description: "Beyond the lounge. From private aviation to sold-out theatre seats, we manage your life with precision.",
     image: "https://images.unsplash.com/photo-1540962351504-03099e0a754b?q=80&w=2070&auto=format&fit=crop",
   },
-  // 4. PRIVATE EVENTS (Covers "Private Celebrations")
   {
     id: "04",
     title: "Private Suites",
@@ -38,7 +34,6 @@ const amenities = [
     description: "Intimate spaces available for private hire. Birthdays, anniversaries, and confidential gatherings.",
     image: "https://events.theharleylounge.com/wp-content/uploads/2025/10/Private-Event-Party-Hire.jpg.jpg",
   },
-  // 5. CORPORATE (Covers "Corporate Events")
   {
     id: "05",
     title: "Corporate Affairs",
@@ -46,7 +41,6 @@ const amenities = [
     description: "From board meetings to product launches. Impress your stakeholders in a venue that commands respect.",
     image: "https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=2069&auto=format&fit=crop",
   },
-  // 6. SEASONAL (Covers "Seasonal Gatherings" - NEW)
   {
     id: "06",
     title: "The Calendar",
@@ -63,66 +57,106 @@ export default function Amenities() {
     target: targetRef,
   });
 
-  // Adjusted Scroll Distance: 
-  // We have more cards now, so we need to scroll further left (-90%) to see the last card.
-  const x = useTransform(scrollYProgress, [0, 1], ["1%", "-92%"]);
+  // Smooth Horizontal Scroll
+  const x = useTransform(scrollYProgress, [0, 1], ["0%", "-85%"]);
+  const smoothX = useSpring(x, { damping: 20, stiffness: 100 });
 
   return (
-    <section ref={targetRef} id="amenities" className="relative h-[300vh] bg-obsidian">
+    <section ref={targetRef} className="relative h-[400vh] bg-[#02120b]"> {/* Increased height for slower scroll */}
       
       <div className="sticky top-0 flex h-screen items-center overflow-hidden">
         
-        {/* SECTION TITLE */}
-        <div className="absolute top-10 left-10 md:left-20 z-20 mix-blend-difference">
-           <h2 className="text-4xl md:text-6xl font-serif text-cream">Amenities</h2>
-           <p className="text-xs text-gold uppercase tracking-[0.3em] mt-2">Life at The Harley</p>
+        {/* BACKGROUND AMBIENCE */}
+        <div className="absolute inset-0 pointer-events-none">
+           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(238,187,77,0.05)_0%,transparent_40%)]" />
+           <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#0b3d2e]/20 blur-[100px]" />
         </div>
 
-        {/* THE HORIZONTAL SCROLL */}
-        <motion.div style={{ x }} className="flex gap-10 pl-[20vw] md:pl-[30vw]">
-          {amenities.map((item) => (
-            <div key={item.id} className="group relative h-[60vh] w-[85vw] md:w-[45vh] flex-shrink-0 bg-neutral-900 border border-white/5 overflow-hidden cursor-pointer">
-              
-              <Image
-                src={item.image}
-                alt={item.title}
-                fill
-                className="object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0"
-              />
-              
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-90 group-hover:opacity-60 transition-opacity duration-500" />
+        {/* STATIC HEADER */}
+        <div className="absolute top-12 left-8 md:left-20 z-20">
+           <motion.div 
+             initial={{ opacity: 0, x: -20 }}
+             whileInView={{ opacity: 1, x: 0 }}
+             transition={{ duration: 1 }}
+           >
+             <h2 className="text-5xl md:text-7xl font-serif text-[#eae8dc]">Amenities</h2>
+             <div className="flex items-center gap-4 mt-4">
+               <div className="h-[1px] w-12 bg-[#eebb4d]" />
+               <p className="text-xs text-[#eebb4d] uppercase tracking-[0.3em]">Life at The Harley</p>
+             </div>
+           </motion.div>
+        </div>
 
-              <div className="absolute bottom-0 left-0 p-8 w-full">
-                <div className="flex justify-between items-end border-b border-white/20 pb-4 mb-4">
-                  <span className="text-gold text-xs font-mono">{item.id}</span>
-                  <span className="text-xs uppercase tracking-widest text-white/60">{item.category}</span>
-                </div>
-                
-                <h3 className="text-3xl font-serif text-cream mb-2 group-hover:text-gold transition-colors">{item.title}</h3>
-                <p className="text-sm text-gray-400 font-light line-clamp-3 group-hover:text-white transition-colors leading-relaxed">
-                  {item.description}
-                </p>
-                
-                <div className="absolute top-8 right-8 opacity-0 group-hover:opacity-100 transition-opacity duration-500 transform translate-y-4 group-hover:translate-y-0">
-                  <div className="p-3 rounded-full bg-gold/10 backdrop-blur-md border border-gold/30">
-                    <ArrowUpRight className="w-5 h-5 text-gold" />
-                  </div>
-                </div>
-              </div>
-              
-            </div>
+        {/* THE GALLERY TRACK */}
+        <motion.div style={{ x: smoothX }} className="flex gap-16 pl-[15vw] md:pl-[25vw] items-center">
+          {amenities.map((item, i) => (
+             <Card key={item.id} item={item} index={i} />
           ))}
         </motion.div>
         
-        {/* PROGRESS BAR */}
-        <div className="absolute bottom-10 left-10 md:left-20 right-10 md:right-20 h-[1px] bg-white/10">
+        {/* CUSTOM SCROLLBAR */}
+        <div className="absolute bottom-12 left-8 md:left-20 right-8 md:right-20 h-[1px] bg-white/5">
            <motion.div 
              style={{ scaleX: scrollYProgress }} 
-             className="h-full bg-gold origin-left" 
+             className="h-full bg-[#eebb4d] origin-left shadow-[0_0_10px_#eebb4d]" 
            />
         </div>
 
       </div>
     </section>
+  );
+}
+
+function Card({ item, index }: { item: any, index: number }) {
+  return (
+    <div className="group relative h-[65vh] w-[85vw] md:w-[50vh] flex-shrink-0 cursor-pointer perspective-1000">
+      
+      {/* 1. The Image Container with Inner Parallax */}
+      <div className="relative h-full w-full overflow-hidden bg-[#050505] border border-white/5 group-hover:border-[#eebb4d]/30 transition-colors duration-500 shadow-2xl">
+        <Image
+          src={item.image}
+          alt={item.title}
+          fill
+          className="object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-110 grayscale-[100%] group-hover:grayscale-0 contrast-[1.1]"
+        />
+        
+        {/* Cinematic Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#02120b]/20 to-[#02120b] opacity-80 group-hover:opacity-60 transition-opacity duration-500" />
+        <div className="absolute inset-0 bg-[#0b3d2e]/20 mix-blend-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      </div>
+
+      {/* 2. The Content Overlay (Glassmorphism) */}
+      <div className="absolute bottom-0 left-0 w-full p-8 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+         
+         {/* Floating Number */}
+         <div className="absolute -top-12 right-6 text-6xl font-serif text-white/5 group-hover:text-[#eebb4d]/10 transition-colors duration-500">
+           {item.id}
+         </div>
+
+         <div className="relative z-10">
+           <div className="flex justify-between items-center mb-4 opacity-70 group-hover:opacity-100 transition-opacity">
+             <span className="text-[#eebb4d] text-[10px] uppercase tracking-[0.2em] border border-[#eebb4d]/20 px-3 py-1 rounded-full">
+               {item.category}
+             </span>
+           </div>
+
+           <h3 className="text-3xl font-serif text-[#eae8dc] mb-3 group-hover:text-white transition-colors duration-300">
+             {item.title}
+           </h3>
+
+           <div className="h-0 group-hover:h-auto overflow-hidden transition-all duration-500">
+             <p className="text-sm text-[#eae8dc]/60 font-light leading-relaxed mb-6 opacity-0 group-hover:opacity-100 transition-opacity duration-700 delay-100">
+               {item.description}
+             </p>
+             
+             <div className="flex items-center gap-2 text-[#eebb4d] text-xs uppercase tracking-widest group/btn">
+               <span>Explore</span>
+               <ArrowUpRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1" />
+             </div>
+           </div>
+         </div>
+      </div>
+      
+    </div>
   );
 }

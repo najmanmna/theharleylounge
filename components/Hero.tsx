@@ -1,137 +1,166 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { useRef, useState } from "react";
+import { 
+  useScroll, 
+  useTransform, 
+  useMotionValue, 
+  useSpring, 
+  LazyMotion, 
+  domAnimation, 
+  m, 
+  AnimatePresence 
+} from "framer-motion";
 
 export default function Hero() {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef(null);
+  const [loopKey, setLoopKey] = useState(0);
 
-  // --- MOUSE TRACKING FOR "TORCH" EFFECT ---
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+  // 1. Scroll Parallax
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"],
+  });
 
-    const handleMouseMove = (e: MouseEvent) => {
-      const { left, top } = container.getBoundingClientRect();
-      const x = e.clientX - left;
-      const y = e.clientY - top;
-      
-      // Update CSS variables for the spotlight
-      container.style.setProperty("--mouse-x", `${x}px`);
-      container.style.setProperty("--mouse-y", `${y}px`);
-    };
+  const textY = useTransform(scrollYProgress, [0, 1], ["0%", "60%"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
-    container.addEventListener("mousemove", handleMouseMove);
-    return () => container.removeEventListener("mousemove", handleMouseMove);
-  }, []);
+  // 2. Mouse Parallax (The "Floating" Effect)
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  // Smooth out the mouse movement so it feels like floating in water
+  const smoothX = useSpring(mouseX, { damping: 50, stiffness: 400 });
+  const smoothY = useSpring(mouseY, { damping: 50, stiffness: 400 });
+
+  const handleMouseMove = (e) => {
+    const { clientX, clientY } = e;
+    const { innerWidth, innerHeight } = window;
+    // Calculate movement relative to center (ranges from -20 to 20 pixels)
+    mouseX.set((clientX / innerWidth - 0.5) * -30);
+    mouseY.set((clientY / innerHeight - 0.5) * -30);
+  };
+
+  const handleVideoEnd = () => {
+    setLoopKey((prev) => prev + 1);
+  };
 
   return (
-    <section 
-      ref={containerRef}
-      className="relative h-screen w-full overflow-hidden bg-obsidian flex items-center justify-center"
-    >
-      {/* 1. BACKGROUND LAYERS */}
-      
-      {/* Base Dark Layer (The "Unlit" Room) */}
-      <div className="absolute inset-0 bg-neutral-950 z-0" />
-
-      {/* The Texture Layer (Revealed by Mouse) */}
-      {/* Note: In production, replace the url below with a high-res photo of the lounge interior. */}
-      <div 
-        className="absolute inset-0 opacity-0 transition-opacity duration-300 z-10"
-        style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1571508601891-ca5e7a713859?q=80&w=2070&auto=format&fit=crop')", // Placeholder: Dark Moody Interior
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          // The Magic: We mask this image so it only shows under the mouse
-          maskImage: "radial-gradient(circle 300px at var(--mouse-x) var(--mouse-y), black 0%, transparent 80%)",
-          WebkitMaskImage: "radial-gradient(circle 300px at var(--mouse-x) var(--mouse-y), black 0%, transparent 80%)",
-          opacity: 1 // We keep opacity 1, but the mask hides it
-        }} 
-      />
-
-      {/* 2. THE GOLD SCRIBBLE ANIMATION (Logo Mimic) */}
-      <div className="absolute inset-0 pointer-events-none z-20 opacity-30">
-        <svg className="w-full h-full" viewBox="0 0 1000 1000" preserveAspectRatio="none">
-          <motion.path
-            d="M100,500 C200,300 400,100 600,500 S 900,900 300,500 S 100,100 500,100 S 900,500 500,900" // Abstract loops
-            fill="transparent"
-            stroke="#D4AF37"
-            strokeWidth="1"
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ duration: 3, ease: "easeInOut" }}
-          />
-        </svg>
-      </div>
-
-      {/* 3. HERO CONTENT */}
-      <div className="relative z-30 text-center px-4 max-w-4xl">
-        
-        {/* Animated Subtitle */}
-        <motion.p 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.8 }}
-          className="text-gold text-xs md:text-sm tracking-[0.3em] uppercase mb-6 font-sans"
-        >
-          15 Cavendish Square • London
-        </motion.p>
-
-        {/* Main Title - Split for impact */}
-        <div className="overflow-hidden mb-2">
-          <motion.h1 
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            transition={{ delay: 0.8, duration: 1, ease: [0.76, 0, 0.24, 1] }}
-            className="text-5xl md:text-8xl lg:text-9xl font-serif text-cream leading-[0.9]"
-          >
-            THE HARLEY
-          </motion.h1>
-        </div>
-        <div className="overflow-hidden mb-12">
-          <motion.h1 
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            transition={{ delay: 1.0, duration: 1, ease: [0.76, 0, 0.24, 1] }}
-            className="text-5xl md:text-8xl lg:text-9xl font-serif text-cream italic opacity-80 leading-[0.9]"
-          >
-            LOUNGE
-          </motion.h1>
-        </div>
-
-        {/* CTA Button */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.5, duration: 1 }}
-        >
-          <button className="group relative px-8 py-4 bg-transparent border border-white/20 hover:border-gold transition-colors duration-500 overflow-hidden">
-            {/* Button Fill Effect */}
-            <div className="absolute inset-0 bg-gold transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-in-out z-0" />
-            
-            <div className="relative z-10 flex items-center gap-4">
-              <span className="text-sm uppercase tracking-widest text-cream group-hover:text-obsidian transition-colors">
-                Request Access
-              </span>
-              <ArrowRight className="w-4 h-4 text-cream group-hover:text-obsidian transition-colors" />
-            </div>
-          </button>
-        </motion.div>
-      </div>
-
-      {/* 4. SCROLL INDICATOR */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2.0, duration: 1 }}
-        className="absolute bottom-12 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2"
+    <LazyMotion features={domAnimation}>
+      <section 
+        ref={containerRef} 
+        onMouseMove={handleMouseMove}
+        className="relative h-[110vh] w-full overflow-hidden bg-[#02120b]" // Deep Emerald Base
       >
-        <span className="text-[10px] text-white/30 uppercase tracking-widest">Scroll</span>
-        <div className="w-[1px] h-12 bg-gradient-to-b from-gold/50 to-transparent" />
-      </motion.div>
+        
+        {/* --- LAYER 1: The Cinematic "Ken Burns" Video --- */}
+        <div className="absolute inset-0 z-0">
+          <AnimatePresence mode="popLayout">
+            <m.div
+              key={loopKey}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 2.5, ease: "easeInOut" }}
+              className="absolute inset-0 w-full h-full"
+            >
+              <m.video
+                // The Scale Animation: Slowly zooms from 1.05 to 1.15 over the video duration
+                initial={{ scale: 1.05 }}
+                animate={{ scale: 1.15 }}
+                transition={{ duration: 15, ease: "linear" }} // Adjust duration to match your video length roughly
+                onEnded={handleVideoEnd}
+                autoPlay
+                muted
+                playsInline
+                className="object-cover w-full h-full opacity-50 brightness-[0.7] contrast-[1.1] saturate-[0.8]"
+              >
+                <source src="/harley_lounge.mp4" type="video/mp4" />
+              </m.video>
+            </m.div>
+          </AnimatePresence>
 
-    </section>
+          {/* Atmospheric Tints */}
+          <div className="absolute inset-0 bg-[#061a12]/40 mix-blend-color pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#02120b]/20 to-[#02120b] pointer-events-none" />
+          <div className="absolute inset-0 opacity-[0.04] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+        </div>
+
+        {/* --- LAYER 2: Floating Content --- */}
+        <m.div 
+          style={{ y: textY, x: smoothX, opacity }}
+          className="relative z-10 flex flex-col items-center justify-center h-full text-center px-6"
+        >
+          {/* Top Tagline */}
+          <m.span 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.5, delay: 0.2, ease: "easeOut" }}
+            className="text-[#eebb4d]/60 text-[10px] md:text-xs uppercase tracking-[0.6em] mb-10 block font-medium"
+          >
+            Private & Uninterrupted
+          </m.span>
+
+          {/* Main Title with "Liquid Gold" Gradient */}
+          <m.h1 
+            style={{ x: smoothX }} // Parallax effect specifically on the text
+            initial={{ opacity: 0, filter: "blur(20px)" }}
+            animate={{ opacity: 1, filter: "blur(0px)" }}
+            transition={{ duration: 2, ease: "circOut" }}
+            className="text-6xl md:text-8xl lg:text-9xl font-serif text-[#eae8dc] mb-10 tracking-tight leading-none"
+          >
+            The Harley <br />
+            <span className="italic font-extralight text-white/20 relative inline-block">
+              Lounge
+              {/* Subtle Glow behind the word "Lounge" */}
+              <span className="absolute inset-0 blur-2xl bg-[#eebb4d]/10 -z-10" />
+            </span>
+          </m.h1>
+
+          {/* The Separator Line */}
+          <m.div 
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: "60px", opacity: 1 }}
+            transition={{ duration: 1.5, delay: 0.8 }}
+            className="h-[1px] bg-gradient-to-r from-transparent via-[#eebb4d]/50 to-transparent mb-10"
+          />
+
+          {/* Bottom Text */}
+          <m.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.2, duration: 1.5 }}
+            className="max-w-md text-[#eae8dc]/50 text-xs md:text-sm font-light tracking-[0.2em] uppercase leading-loose"
+          >
+            Escape the noise <span className="text-[#eebb4d] mx-2">•</span> Entry by invitation
+          </m.p>
+
+          {/* Interactive Button */}
+          <m.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.8, duration: 1 }}
+            whileHover={{ scale: 1.05, borderColor: "rgba(238, 187, 77, 0.4)" }}
+            whileTap={{ scale: 0.95 }}
+            className="mt-12 px-8 py-4 border border-[#eebb4d]/20 text-[#eebb4d]/80 text-[10px] uppercase tracking-[0.3em] 
+                       hover:bg-[#eebb4d]/5 hover:text-[#eebb4d] transition-all duration-500 backdrop-blur-sm"
+          >
+            Request Access
+          </m.button>
+        </m.div>
+
+        {/* --- LAYER 3: Scroll Indicator --- */}
+        <m.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.3 }}
+          transition={{ delay: 2, duration: 1 }}
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2"
+        >
+          <span className="text-[8px] uppercase tracking-widest text-white/40">Scroll</span>
+          <div className="w-[1px] h-12 bg-gradient-to-b from-white/40 to-transparent" />
+        </m.div>
+
+      </section>
+    </LazyMotion>
   );
 }
