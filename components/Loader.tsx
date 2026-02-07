@@ -92,7 +92,7 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
               THE HARLEY
             </h1>
             <p className="text-gold text-xs font-sans tracking-[0.6em] mt-3 uppercase opacity-80">
-              Lounge & Conscierge
+              Lounge & Concierge
             </p>
           </motion.div>
 
