@@ -3,22 +3,26 @@
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { useEffect, useState } from "react";
 
+// Extend the window interface to avoid TypeScript errors
+declare global {
+  interface Window {
+    hasShownHarleyLoader?: boolean;
+  }
+}
+
 export default function Loader({ onComplete }: { onComplete: () => void }) {
   const [isFinished, setIsFinished] = useState(false);
-  const [shouldRender, setShouldRender] = useState(true); // Control rendering to avoid flash
+  const [shouldRender, setShouldRender] = useState(true);
 
   useEffect(() => {
-    // 1. Check if the user has already seen the loader in this session
-    const hasSeenLoader = sessionStorage.getItem("harley-loader-seen");
-
-    if (hasSeenLoader) {
-      // If yes, skip animation entirely
+    // 1. Check a temporary window variable (Clears on refresh, Persists on navigation)
+    if (typeof window !== "undefined" && window.hasShownHarleyLoader) {
       setShouldRender(false);
       onComplete();
       return;
     }
 
-    // 2. If not, play the animation
+    // 2. Play Animation
     document.body.style.overflow = "hidden";
     
     const timer = setTimeout(() => {
@@ -32,16 +36,18 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
   }, [onComplete]);
 
   const handleAnimationComplete = () => {
-    // 3. Save the flag so it doesn't run again
-    sessionStorage.setItem("harley-loader-seen", "true");
+    // 3. Mark as shown in the current window instance
+    if (typeof window !== "undefined") {
+      window.hasShownHarleyLoader = true;
+    }
     
     document.body.style.overflow = "auto";
     onComplete();
   };
 
-  // If we shouldn't render (because we've seen it), return null
   if (!shouldRender) return null;
 
+  // ... (Rest of your animation variants and JSX remain exactly the same)
   const draw: Variants = {
     hidden: { pathLength: 0, opacity: 0 },
     visible: (i: number) => ({
