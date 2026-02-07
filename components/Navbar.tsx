@@ -8,10 +8,9 @@ import { Menu, X, ArrowRight } from "lucide-react";
 
 const navLinks = [
   { title: "The Sanctuary", href: "/#about", subtitle: "Our Story" },
-  // UPDATED: Now links to the dedicated page instead of the homepage anchor
-  { title: "Facilities", href: "/facilities", subtitle: "Spaces & Services" }, 
+  // UPDATED: Changed Title to "Concierge"
+  { title: "Concierge", href: "/facilities", subtitle: "Spaces & Services" }, 
   { title: "Membership", href: "/#membership", subtitle: "Join the Club" },
- // Added Lifestyle page too since we built it
   { title: "Events", href: "/events", subtitle: "Social Calendar" },
   { title: "Contact", href: "/#contact", subtitle: "Get in Touch" },
 ];
@@ -109,7 +108,7 @@ export default function Navbar() {
             animate={{ clipPath: "inset(0 0 0% 0)" }}
             exit={{ clipPath: "inset(0 0 100% 0)" }}
             transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }} 
-            className="fixed inset-0 z-[100] bg-[#02120b] flex flex-col justify-center items-center"
+            className="fixed inset-0 z-[100] bg-[#02120b] flex flex-col justify-center items-center overflow-hidden"
           >
             <div className="absolute inset-0 opacity-[0.04] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#eebb4d]/5 blur-[120px] pointer-events-none" />
@@ -117,48 +116,46 @@ export default function Navbar() {
 
             <button
               onClick={() => setIsOpen(false)}
-              className="absolute top-8 right-6 md:right-12 p-4 group z-20"
+              className="absolute top-6 right-6 md:top-8 md:right-12 p-4 group z-20"
             >
               <div className="p-3 border border-white/10 rounded-full group-hover:border-[#eebb4d] group-hover:rotate-90 transition-all duration-500 bg-[#050505]/50 backdrop-blur-sm">
                 <X className="w-6 h-6 text-[#eae8dc] group-hover:text-[#eebb4d]" />
               </div>
             </button>
 
-            <div className="flex flex-col items-center gap-2 z-10 w-full max-w-lg">
+            {/* Links Container */}
+            <div className="flex flex-col items-center gap-4 md:gap-2 z-10 w-full max-w-lg px-6">
               {navLinks.map((link, index) => {
-                // Determine if this link is active
-                // For main pages like /facilities, checks if pathname starts with it
-                // For anchor links, checks if we are on homepage + that specific hash (basic check)
                 const isActive = 
-                    (link.href.startsWith("/#") && pathname === "/" && link.href === "/#about") || // Default active on home
+                    (link.href.startsWith("/#") && pathname === "/" && link.href === "/#about") || 
                     (pathname === link.href) || 
                     (pathname.startsWith(link.href) && link.href !== "/");
 
                 return (
                   <motion.div
                     key={link.title}
-                    initial={{ opacity: 0, y: 40 }}
+                    initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 + (index * 0.1), duration: 0.5, ease: "easeOut" }}
-                    className="w-full"
+                    transition={{ delay: 0.2 + (index * 0.1), duration: 0.5, ease: "easeOut" }}
+                    className="w-full text-center"
                   >
                     <Link
                       href={link.href}
                       onClick={(e) => handleLinkClick(e, link.href)}
-                      className="group relative flex items-center justify-between w-full py-6 border-b border-white/5 hover:border-[#eebb4d]/30 transition-colors duration-500"
+                      className="group relative inline-flex items-center justify-center w-full py-3 md:py-6 border-b border-white/5 md:border-transparent hover:border-[#eebb4d]/30 transition-colors duration-500"
                     >
-                      <div className="flex flex-col items-start">
-                          <span className="text-[10px] uppercase tracking-[0.2em] text-[#eebb4d]/60 mb-1 group-hover:text-[#eebb4d] transition-colors">
+                      <div className="flex flex-col items-center md:items-start relative">
+                          <span className="hidden md:block text-[10px] uppercase tracking-[0.2em] text-[#eebb4d]/60 mb-1 group-hover:text-[#eebb4d] transition-colors absolute -left-8 top-2">
                               0{index + 1}
                           </span>
-                          <span className={`text-4xl md:text-6xl font-serif transition-colors duration-500 group-hover:translate-x-4 transform ${
+                          <span className={`text-3xl sm:text-5xl md:text-6xl font-serif transition-colors duration-500 md:group-hover:translate-x-4 transform ${
                              isActive ? 'text-[#eebb4d]' : 'text-[#eae8dc] group-hover:text-white'
                           }`}>
                             {link.title}
                           </span>
                       </div>
                       
-                      <div className="opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-500">
+                      <div className="hidden md:block opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-4 transition-all duration-500 absolute right-0">
                           <ArrowRight className="w-8 h-8 text-[#eebb4d]" />
                       </div>
                     </Link>
@@ -171,7 +168,7 @@ export default function Navbar() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.8 }}
-                className="absolute bottom-12 text-center space-y-4"
+                className="absolute bottom-6 md:bottom-6 text-center space-y-4 px-6 w-full"
             >
               <div className="h-[1px] w-12 bg-[#eebb4d]/30 mx-auto mb-4" />
               <p className="text-[#eebb4d] text-[10px] tracking-[0.3em] uppercase">
