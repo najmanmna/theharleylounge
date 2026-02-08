@@ -65,8 +65,9 @@ function ContactContent() {
             <h3 className="flex items-center gap-3 text-[#eebb4d] text-xs uppercase tracking-widest mb-2">
               <MapPin className="w-4 h-4" /> Address
             </h3>
+            {/* CORRECTION: Updated to 15 Cavendish Square */}
             <p className="text-[#eae8dc]/80 font-serif text-lg md:text-xl">
-              11 Cavendish Square <br /> Marylebone, London W1G 9AN
+              15 Cavendish Square <br /> Marylebone, London W1G 9AN
             </p>
           </div>
           <div className="group">
@@ -129,6 +130,7 @@ function ContactContent() {
                onSubmit={handleSubmit} 
                className="relative z-10 flex flex-col gap-6 md:gap-8 w-full"
              >
+               {/* ... (Form Inputs Remain Unchanged) ... */}
                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                  <div className="flex flex-col gap-2">
                    <label className="text-[#eebb4d] text-[10px] uppercase tracking-widest">Full Name</label>
@@ -228,7 +230,6 @@ export default function Contact() {
   return (
     <main className="bg-[#02120b] min-h-screen text-[#eae8dc] selection:bg-[#eebb4d] selection:text-[#02120b] overflow-x-hidden">
       <Navbar />
-      {/* FIX: Added overflow-hidden here to clip the blurred circle */}
       <section className="relative pt-24 md:pt-32 min-h-screen flex items-center overflow-hidden">
         <div className="absolute inset-0 opacity-[0.04] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
         
