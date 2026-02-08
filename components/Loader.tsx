@@ -37,7 +37,7 @@ export default function Loader({ onComplete }: LoaderProps) {
         onComplete();
         document.body.style.overflow = "unset";
       }, 1200); 
-    }, 3500);
+    }, 2500);
 
     return () => {
       document.body.style.overflow = "unset";
