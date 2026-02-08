@@ -39,7 +39,6 @@ function ContactContent() {
   };
 
   return (
-    // OPTIMIZATION: Reduced gap on mobile (gap-12 vs gap-24)
     <div className="container mx-auto px-6 md:px-12 flex flex-col md:flex-row gap-12 md:gap-24 pb-20">
       
       {/* LEFT: Contact Info */}
@@ -53,7 +52,6 @@ function ContactContent() {
           Contact Us
         </span>
         
-        {/* OPTIMIZATION: Smaller text on mobile (text-4xl) to prevent bad wrapping */}
         <h1 className="text-4xl md:text-7xl font-serif text-[#eae8dc] leading-[1.1] mb-6 md:mb-8">
           Begin the <br /> Conversation
         </h1>
@@ -95,7 +93,6 @@ function ContactContent() {
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.2 }}
-        // OPTIMIZATION: Reduced padding on mobile (p-6)
         className="w-full md:w-7/12 bg-[#050505] border border-white/5 p-6 md:p-12 relative overflow-hidden min-h-[500px] md:min-h-[600px] flex flex-col justify-center"
       >
          <div className="absolute top-0 right-0 w-32 h-32 bg-[#eebb4d]/10 blur-[50px] pointer-events-none" />
@@ -229,12 +226,13 @@ function ContactContent() {
 
 export default function Contact() {
   return (
-    <main className="bg-[#02120b] min-h-screen text-[#eae8dc] selection:bg-[#eebb4d] selection:text-[#02120b]">
+    <main className="bg-[#02120b] min-h-screen text-[#eae8dc] selection:bg-[#eebb4d] selection:text-[#02120b] overflow-x-hidden">
       <Navbar />
-      <section className="relative pt-24 md:pt-32 min-h-screen flex items-center">
+      {/* FIX: Added overflow-hidden here to clip the blurred circle */}
+      <section className="relative pt-24 md:pt-32 min-h-screen flex items-center overflow-hidden">
         <div className="absolute inset-0 opacity-[0.04] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
         
-        {/* OPTIMIZATION: Shifted blur to not cover text on mobile */}
+        {/* Decorative Blur */}
         <div className="absolute top-0 right-0 w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-[#eebb4d]/5 blur-[80px] md:blur-[120px] rounded-full pointer-events-none translate-x-1/2 md:translate-x-0" />
 
         <Suspense fallback={<div className="container mx-auto px-6 h-[600px] flex items-center justify-center text-[#eebb4d]">Loading...</div>}>
