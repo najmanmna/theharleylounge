@@ -7,7 +7,6 @@ interface LoaderProps {
   onComplete: () => void;
 }
 
-// 1. Extend Window interface to avoid TypeScript errors
 declare global {
   interface Window {
     harleyLoaderShown: boolean;
@@ -16,35 +15,32 @@ declare global {
 
 export default function Loader({ onComplete }: LoaderProps) {
   const [isPresent, setIsPresent] = useState(true);
-  const [shouldRender, setShouldRender] = useState(true); // Extra state to prevent flash
+  const [shouldRender, setShouldRender] = useState(true);
 
   useEffect(() => {
-    // 2. Check if we have already shown the loader in this "window" session
-    // (This variable survives navigation but is wiped on Refresh)
+    // Check if loader was already shown
     if (typeof window !== "undefined" && window.harleyLoaderShown) {
       setShouldRender(false);
       onComplete();
       return;
     }
 
-    // --- If we are here, it's a Refresh or First Load ---
-    
     // Lock scroll
     document.body.style.overflow = "hidden";
     
-    // Run the animation timer
+    // Timer
     const timer = setTimeout(() => {
       setIsPresent(false);
       
-      // Mark as shown so we skip it next time we navigate back here
       if (typeof window !== "undefined") {
         window.harleyLoaderShown = true;
       }
 
+      // Wait for the exit animation (0.8s) + a tiny buffer
       setTimeout(() => {
         onComplete();
         document.body.style.overflow = "unset";
-      }, 800); 
+      }, 1000); 
     }, 3500);
 
     return () => {
@@ -53,18 +49,28 @@ export default function Loader({ onComplete }: LoaderProps) {
     };
   }, [onComplete]);
 
-  // If we shouldn't render (navigation), return null immediately
   if (!shouldRender) return null;
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {isPresent && (
         <motion.div
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0, transition: { duration: 0.8, ease: "easeInOut" } }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black text-white"
+          key="loader-curtain"
+          initial={{ y: 0 }}
+          exit={{ 
+            y: "-100%", // The Curtain Lift Effect
+            transition: { 
+              duration: 0.8, 
+              ease: [0.76, 0, 0.24, 1] // Custom "Luxury" Bezier Curve
+            } 
+          }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black text-white will-change-transform"
         >
-          <div className="relative flex items-center justify-center w-80 h-80 md:w-96 md:h-96">
+          {/* Inner Content Container - Fades out slightly as the curtain lifts */}
+          <motion.div 
+             exit={{ opacity: 0, y: -50, transition: { duration: 0.5 } }}
+             className="relative flex items-center justify-center w-80 h-80 md:w-96 md:h-96"
+          >
             
             {/* --- 1. The Double Diamond Border Animation --- */}
             <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
@@ -97,7 +103,6 @@ export default function Loader({ onComplete }: LoaderProps) {
             {/* --- 2. The Text Content --- */}
             <div className="relative z-10 flex flex-col items-center justify-center text-center transform scale-90 md:scale-100">
               
-              {/* "THE" */}
               <motion.span
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -107,7 +112,6 @@ export default function Loader({ onComplete }: LoaderProps) {
                 THE
               </motion.span>
 
-              {/* Top Separator Line */}
               <motion.div
                 initial={{ width: 0, opacity: 0 }}
                 animate={{ width: "100%", opacity: 1 }}
@@ -115,7 +119,6 @@ export default function Loader({ onComplete }: LoaderProps) {
                 className="h-[1px] bg-white w-32 mb-2"
               />
 
-              {/* "HARLEY LOUNGE" */}
               <motion.h1
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -125,7 +128,6 @@ export default function Loader({ onComplete }: LoaderProps) {
                 Harley Lounge
               </motion.h1>
 
-              {/* Bottom Separator Line */}
               <motion.div
                 initial={{ width: 0, opacity: 0 }}
                 animate={{ width: "100%", opacity: 1 }}
@@ -133,7 +135,6 @@ export default function Loader({ onComplete }: LoaderProps) {
                 className="h-[1px] bg-white w-32 mb-2"
               />
 
-              {/* "CONCIERGE" (Gold Text) */}
               <motion.span
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -144,7 +145,7 @@ export default function Loader({ onComplete }: LoaderProps) {
                 Concierge
               </motion.span>
             </div>
-          </div>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
