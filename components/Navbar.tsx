@@ -8,7 +8,6 @@ import { Menu, X, ArrowRight } from "lucide-react";
 
 const navLinks = [
   { title: "The Sanctuary", href: "/#about", subtitle: "Our Story" },
-  // UPDATED: Changed Title to "Concierge"
   { title: "Concierge", href: "/concierge", subtitle: "Spaces & Services" }, 
   { title: "Membership", href: "/#membership", subtitle: "Join the Club" },
   { title: "Events", href: "/events", subtitle: "Social Calendar" },
@@ -21,12 +20,20 @@ export default function Navbar() {
   const pathname = usePathname();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
 
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     setIsOpen(false);
@@ -53,17 +60,17 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-[50] transition-all duration-700 ${
+        className={`fixed top-0 left-0 right-0 z-[50] transition-all duration-500 ${
           scrolled
-           ? "bg-[#02120b] md:bg-[#02120b]/80 md:backdrop-blur-md border-b border-white/5 py-4" 
-    : "bg-transparent py-8"
+            ? "bg-[#02120b]/90 backdrop-blur-md border-b border-white/5 py-4" 
+            : "bg-transparent py-5 md:py-8"
         }`}
       >
         <div className="container mx-auto px-6 md:px-12 flex justify-between items-center">
           
           <Link href="/" className="z-[60] relative group">
             <div className="flex flex-col items-start">
-              <span className="font-serif text-xl md:text-2xl tracking-widest text-[#eae8dc] group-hover:text-[#eebb4d] transition-colors duration-500">
+              <span className="font-serif text-lg md:text-2xl tracking-widest text-[#eae8dc] group-hover:text-[#eebb4d] transition-colors duration-500">
                 THE HARLEY
               </span>
               <span className="text-[0.5rem] md:text-[0.6rem] uppercase tracking-[0.3em] text-[#eebb4d]/80 group-hover:tracking-[0.4em] transition-all duration-500">
@@ -85,16 +92,17 @@ export default function Navbar() {
             <button
               onClick={() => setIsOpen(true)}
               className="group flex items-center gap-3 focus:outline-none"
+              aria-label="Open Menu"
             >
               <span className="hidden md:block text-[10px] uppercase tracking-[0.2em] text-[#eae8dc] group-hover:text-[#eebb4d] transition-colors">
                 Menu
               </span>
-              <div className={`p-2 border rounded-full transition-all duration-500 group-hover:rotate-90 ${
+              <div className={`p-2 border rounded-full transition-all duration-500 ${
                 scrolled 
-                  ? "border-white/10 group-hover:border-[#eebb4d]" 
-                  : "border-white/20 group-hover:border-[#eebb4d]"
+                  ? "border-white/10" 
+                  : "border-white/20"
               }`}>
-                <Menu className="w-5 h-5 text-[#eae8dc] group-hover:text-[#eebb4d]" />
+                <Menu className="w-5 h-5 text-[#eae8dc]" />
               </div>
             </button>
           </div>
@@ -104,27 +112,26 @@ export default function Navbar() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ clipPath: "inset(0 0 100% 0)" }}
-            animate={{ clipPath: "inset(0 0 0% 0)" }}
-            exit={{ clipPath: "inset(0 0 100% 0)" }}
-            transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }} 
-            className="fixed inset-0 z-[100] bg-[#02120b] flex flex-col justify-center items-center overflow-hidden"
+            // CHANGE: Set initial to full open state (no animation on enter)
+            initial={{ opacity: 1 }} 
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 0.3 } }} // Optional fade out on close
+            className="fixed inset-0 z-[100] bg-[#02120b] flex flex-col justify-center items-center overflow-hidden touch-none"
           >
             <div className="absolute inset-0 opacity-[0.04] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#eebb4d]/5 blur-[120px] pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#0b3d2e]/10 blur-[120px] pointer-events-none" />
-
+            <div className="absolute top-0 right-0 w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-[#eebb4d]/5 blur-[80px] md:blur-[120px] pointer-events-none" />
+            
             <button
               onClick={() => setIsOpen(false)}
-              className="absolute top-6 right-6 md:top-8 md:right-12 p-4 group z-20"
+              className="absolute top-6 right-6 md:top-8 md:right-12 p-2 group z-20"
+              aria-label="Close Menu"
             >
-              <div className="p-3 border border-white/10 rounded-full group-hover:border-[#eebb4d] group-hover:rotate-90 transition-all duration-500 bg-[#050505]/50 backdrop-blur-sm">
-                <X className="w-6 h-6 text-[#eae8dc] group-hover:text-[#eebb4d]" />
+              <div className="p-3 border border-white/10 rounded-full bg-[#050505]/50 backdrop-blur-sm">
+                <X className="w-6 h-6 text-[#eae8dc]" />
               </div>
             </button>
 
-            {/* Links Container */}
-            <div className="flex flex-col items-center gap-4 md:gap-2 z-10 w-full max-w-lg px-6">
+            <div className="flex flex-col items-center gap-6 md:gap-2 z-10 w-full max-w-lg px-6">
               {navLinks.map((link, index) => {
                 const isActive = 
                     (link.href.startsWith("/#") && pathname === "/" && link.href === "/#about") || 
@@ -134,48 +141,56 @@ export default function Navbar() {
                 return (
                   <motion.div
                     key={link.title}
-                    initial={{ opacity: 0, y: 30 }}
+                    // Optional: Keep slight fade-in for text only, or remove for instant
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 + (index * 0.1), duration: 0.5, ease: "easeOut" }}
+                    transition={{ delay: 0.1 + (index * 0.05), duration: 0.3 }}
                     className="w-full text-center"
                   >
                     <Link
                       href={link.href}
                       onClick={(e) => handleLinkClick(e, link.href)}
-                      className="group relative inline-flex items-center justify-center w-full py-3 md:py-6 border-b border-white/5 md:border-transparent hover:border-[#eebb4d]/30 transition-colors duration-500"
+                      className="group relative inline-flex items-center justify-center w-full py-2 md:py-6"
                     >
                       <div className="flex flex-col items-center md:items-start relative">
-                          <span className="hidden md:block text-[10px] uppercase tracking-[0.2em] text-[#eebb4d]/60 mb-1 group-hover:text-[#eebb4d] transition-colors absolute -left-8 top-2">
-                              0{index + 1}
-                          </span>
-                          <span className={`text-3xl sm:text-5xl md:text-6xl font-serif transition-colors duration-500 md:group-hover:translate-x-4 transform ${
-                             isActive ? 'text-[#eebb4d]' : 'text-[#eae8dc] group-hover:text-white'
+                          <span className={`text-3xl sm:text-5xl md:text-6xl font-serif transition-colors duration-300 ${
+                             isActive ? 'text-[#eebb4d]' : 'text-[#eae8dc]'
                           }`}>
                             {link.title}
                           </span>
-                      </div>
-                      
-                      <div className="hidden md:block opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-4 transition-all duration-500 absolute right-0">
-                          <ArrowRight className="w-8 h-8 text-[#eebb4d]" />
+                          {/* <span className="text-[10px] uppercase tracking-widest text-[#eae8dc]/30 mt-1 md:hidden">
+                            {link.subtitle}
+                          </span> */}
                       </div>
                     </Link>
                   </motion.div>
                 );
               })}
+              
+              <motion.div
+                 initial={{ opacity: 0, y: 10 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 transition={{ delay: 0.4, duration: 0.3 }}
+                 className="mt-8 md:hidden"
+              >
+                 <Link 
+                   href="https://apply.theharleylounge.com/"
+                   className="px-8 py-3 border border-[#eebb4d]/30 text-[#eebb4d] text-xs uppercase tracking-[0.2em]"
+                 >
+                   Apply for Membership
+                 </Link>
+              </motion.div>
             </div>
 
             <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.8 }}
-                className="absolute bottom-6 md:bottom-6 text-center space-y-4 px-6 w-full"
+                transition={{ delay: 0.5 }}
+                className="absolute bottom-8 text-center space-y-4 px-6 w-full"
             >
               <div className="h-[1px] w-12 bg-[#eebb4d]/30 mx-auto mb-4" />
               <p className="text-[#eebb4d] text-[10px] tracking-[0.3em] uppercase">
                 15 Cavendish Square, London
-              </p>
-              <p className="text-[#eae8dc]/40 text-xs font-serif italic tracking-wide">
-                "Where Intellect Meets Indulgence"
               </p>
             </motion.div>
 
