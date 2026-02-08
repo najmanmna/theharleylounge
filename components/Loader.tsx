@@ -33,7 +33,6 @@ export default function Loader({ onComplete }: LoaderProps) {
         window.harleyLoaderShown = true;
       }
 
-      // Slightly increased buffer to match new animation duration
       setTimeout(() => {
         onComplete();
         document.body.style.overflow = "unset";
@@ -57,22 +56,24 @@ export default function Loader({ onComplete }: LoaderProps) {
           exit={{ 
             y: "-100%", 
             transition: { 
-              duration: 1.2, // Increased from 0.8 to 1.2 for smoothness on tall mobile screens
-              ease: [0.87, 0, 0.13, 1] // "Expo" curve: Fast start, very slow/smooth finish
+              duration: 1.2, 
+              ease: [0.87, 0, 0.13, 1] 
             } 
           }}
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black text-white will-change-transform"
         >
-          {/* Inner Content - Fades out faster so it doesn't fly up with the curtain */}
+          {/* Inner Content */}
           <motion.div 
              exit={{ 
                opacity: 0, 
                y: -100, 
                transition: { duration: 0.5, ease: "easeIn" } 
              }}
-             className="relative flex items-center justify-center w-80 h-80 md:w-96 md:h-96"
+             // Added 'will-change-transform' to force GPU acceleration
+             className="relative flex items-center justify-center w-80 h-80 md:w-96 md:h-96 will-change-transform"
           >
             
+            {/* --- SVG Optimization: Simple transforms --- */}
             <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
               <motion.rect
                 x="15" y="15" width="70" height="70"
@@ -108,11 +109,12 @@ export default function Loader({ onComplete }: LoaderProps) {
                 THE
               </motion.span>
 
+              {/* OPTIMIZATION: Use scaleX instead of width for 60FPS animation */}
               <motion.div
-                initial={{ width: 0, opacity: 0 }}
-                animate={{ width: "100%", opacity: 1 }}
+                initial={{ scaleX: 0, opacity: 0 }}
+                animate={{ scaleX: 1, opacity: 1 }}
                 transition={{ delay: 1.4, duration: 0.8 }}
-                className="h-[1px] bg-white w-32 mb-2"
+                className="h-[1px] bg-white w-32 mb-2 origin-center"
               />
 
               <motion.h1
@@ -124,11 +126,12 @@ export default function Loader({ onComplete }: LoaderProps) {
                 Harley Lounge
               </motion.h1>
 
+              {/* OPTIMIZATION: Use scaleX here too */}
               <motion.div
-                initial={{ width: 0, opacity: 0 }}
-                animate={{ width: "100%", opacity: 1 }}
+                initial={{ scaleX: 0, opacity: 0 }}
+                animate={{ scaleX: 1, opacity: 1 }}
                 transition={{ delay: 1.4, duration: 0.8 }}
-                className="h-[1px] bg-white w-32 mb-2"
+                className="h-[1px] bg-white w-32 mb-2 origin-center"
               />
 
               <motion.span
