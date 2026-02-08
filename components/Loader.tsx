@@ -18,17 +18,14 @@ export default function Loader({ onComplete }: LoaderProps) {
   const [shouldRender, setShouldRender] = useState(true);
 
   useEffect(() => {
-    // Check if loader was already shown
     if (typeof window !== "undefined" && window.harleyLoaderShown) {
       setShouldRender(false);
       onComplete();
       return;
     }
 
-    // Lock scroll
     document.body.style.overflow = "hidden";
     
-    // Timer
     const timer = setTimeout(() => {
       setIsPresent(false);
       
@@ -36,11 +33,11 @@ export default function Loader({ onComplete }: LoaderProps) {
         window.harleyLoaderShown = true;
       }
 
-      // Wait for the exit animation (0.8s) + a tiny buffer
+      // Slightly increased buffer to match new animation duration
       setTimeout(() => {
         onComplete();
         document.body.style.overflow = "unset";
-      }, 1000); 
+      }, 1200); 
     }, 3500);
 
     return () => {
@@ -58,23 +55,25 @@ export default function Loader({ onComplete }: LoaderProps) {
           key="loader-curtain"
           initial={{ y: 0 }}
           exit={{ 
-            y: "-100%", // The Curtain Lift Effect
+            y: "-100%", 
             transition: { 
-              duration: 0.8, 
-              ease: [0.76, 0, 0.24, 1] // Custom "Luxury" Bezier Curve
+              duration: 1.2, // Increased from 0.8 to 1.2 for smoothness on tall mobile screens
+              ease: [0.87, 0, 0.13, 1] // "Expo" curve: Fast start, very slow/smooth finish
             } 
           }}
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black text-white will-change-transform"
         >
-          {/* Inner Content Container - Fades out slightly as the curtain lifts */}
+          {/* Inner Content - Fades out faster so it doesn't fly up with the curtain */}
           <motion.div 
-             exit={{ opacity: 0, y: -50, transition: { duration: 0.5 } }}
+             exit={{ 
+               opacity: 0, 
+               y: -100, 
+               transition: { duration: 0.5, ease: "easeIn" } 
+             }}
              className="relative flex items-center justify-center w-80 h-80 md:w-96 md:h-96"
           >
             
-            {/* --- 1. The Double Diamond Border Animation --- */}
             <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
-              {/* Outer Border */}
               <motion.rect
                 x="15" y="15" width="70" height="70"
                 rx="0"
@@ -86,7 +85,6 @@ export default function Loader({ onComplete }: LoaderProps) {
                 transition={{ duration: 1.5, ease: "easeInOut" }}
                 className="origin-center"
               />
-              {/* Inner Border */}
               <motion.rect
                 x="18" y="18" width="64" height="64"
                 rx="0"
@@ -100,9 +98,7 @@ export default function Loader({ onComplete }: LoaderProps) {
               />
             </svg>
 
-            {/* --- 2. The Text Content --- */}
             <div className="relative z-10 flex flex-col items-center justify-center text-center transform scale-90 md:scale-100">
-              
               <motion.span
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
