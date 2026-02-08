@@ -8,17 +8,17 @@ const images = [
   // COLUMN 1
   { src: "https://events.theharleylounge.com/wp-content/uploads/2025/10/P1350912-1.jpg", title: "Corporate Gala", date: "OCT 2025" },
   { src: "https://plus.unsplash.com/premium_photo-1698529231408-80642212fd1b?q=80&w=765&auto=format&fit=crop", title: "Champagne Nights", date: "NOV 2025" },
-  { src: "https://events.theharleylounge.com/wp-content/uploads/2025/10/Hariharan_meet_and_greet-006-1-scaled.jpg", title: "Private Hire", date: "DEC 2025" },
+  { src: "https://events.theharleylounge.com/wp-content/uploads/2025/10/P1370074-1.jpg", title: "Private Hire", date: "DEC 2025" },
 
   // COLUMN 2
   { src: "https://plus.unsplash.com/premium_photo-1677000666461-fbefa43c2c7f?q=80&w=687&auto=format&fit=crop", title: "Signature Serves", date: "MENU" },
   { src: "https://events.theharleylounge.com/wp-content/uploads/2025/10/P1370225-1.jpg", title: "The Crowd", date: "FRI NIGHT" },
-  { src: "https://events.theharleylounge.com/wp-content/uploads/2025/10/P1350900-1.jpg", title: "Velvet Interiors", date: "DESIGN" },
+  { src: "/img2.png", title: "Velvet Interiors", date: "DESIGN" },
   
   // COLUMN 3
   { src: "https://events.theharleylounge.com/wp-content/uploads/2025/10/P1450817-1.jpg", title: "Party", date: "LIVE" },
   { src: "https://events.theharleylounge.com/wp-content/uploads/2025/10/Corporate-Events.jpg.jpg", title: "Lounge Access", date: "MEMBERS" },
-  { src: "https://events.theharleylounge.com/wp-content/uploads/2025/10/P1410252.jpg", title: "Meetings", date: "ELEGANCE" },
+  { src: "https://events.theharleylounge.com/wp-content/uploads/2025/10/P1450038-1.jpg", title: "Meetings", date: "ELEGANCE" },
 ];
 
 export default function Gallery() {

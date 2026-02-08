@@ -1,31 +1,36 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useScroll, useTransform, useSpring, MotionValue } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link"; // 1. Import Link
 import { ArrowUpRight } from "lucide-react";
 
 const amenities = [
+  // 2. Moved Concierge to #01 and added href
   {
     id: "01",
+    title: "The Concierge",
+    category: "Global Lifestyle",
+    description: "Beyond the lounge. From luxury car services to sold-out theatre seats, we manage your life with precision.",
+    image: "https://images.unsplash.com/photo-1610099610040-ab19f3a5ec35?q=80&w=764&auto=format&fit=crop",
+    href: "/concierge" // Targeted Link
+  },
+  {
+    id: "02",
     title: "The Alchemy Bar",
     category: "Mixology & Dining",
     description: "Signature cocktails and light bites served in an atmosphere of shadowed elegance.",
     image: "https://events.theharleylounge.com/wp-content/uploads/2025/10/P1440875-1.jpg",
+    href: "/dining"
   },
   {
-    id: "02",
+    id: "03",
     title: "The Study",
     category: "Workspace",
     description: "A silent sanctuary for the medical elite and creative visionaries to focus.",
     image: "https://events.theharleylounge.com/wp-content/uploads/2025/10/P1350879-1.jpg",
-  },
-  {
-    id: "03",
-    title: "The Concierge",
-    category: "Global Lifestyle",
-    description: "Beyond the lounge. From luxury car services to sold-out theatre seats, we manage your life with precision.",
-    image: "https://images.unsplash.com/photo-1610099610040-ab19f3a5ec35?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    href: "/workspace"
   },
   {
     id: "04",
@@ -33,6 +38,7 @@ const amenities = [
     category: "Social Events",
     description: "Intimate spaces available for private hire. Birthdays, anniversaries, and confidential gatherings.",
     image: "https://events.theharleylounge.com/wp-content/uploads/2025/10/P1390257-1.jpg",
+    href: "/events"
   },
   {
     id: "05",
@@ -40,6 +46,7 @@ const amenities = [
     category: "Business",
     description: "From board meetings to product launches. Impress your stakeholders in a venue that commands respect.",
     image: "https://events.theharleylounge.com/wp-content/uploads/2025/10/P1430162-1.jpg",
+    href: "/business"
   },
   {
     id: "06",
@@ -47,6 +54,7 @@ const amenities = [
     category: "Member Access",
     description: "Exclusive invitations to our seasonal masquerades, summer soirees, and cultural networking nights.",
     image: "https://events.theharleylounge.com/wp-content/uploads/2025/10/P1370225-1.jpg", 
+    href: "/calendar"
   },
 ];
 
@@ -57,12 +65,10 @@ export default function Amenities() {
     target: targetRef,
   });
 
-  // Smooth Horizontal Scroll (Desktop Only)
   const x = useTransform(scrollYProgress, [0, 1], ["0%", "-85%"]);
   const smoothX = useSpring(x, { damping: 20, stiffness: 100 });
 
   return (
-    // Changed height: "h-[400vh]" only on md+, "auto" on mobile
     <section ref={targetRef} className="relative md:h-[400vh] bg-[#02120b] border-t border-white/5" id="amenities">
       
       {/* =======================
@@ -70,13 +76,11 @@ export default function Amenities() {
       ======================== */}
       <div className="hidden md:flex sticky top-0 h-screen items-center overflow-hidden">
         
-        {/* BACKGROUND AMBIENCE */}
         <div className="absolute inset-0 pointer-events-none">
            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(238,187,77,0.05)_0%,transparent_40%)]" />
            <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#0b3d2e]/20 blur-[100px]" />
         </div>
 
-        {/* STATIC HEADER */}
         <div className="absolute top-12 left-20 z-20">
            <motion.div 
              initial={{ opacity: 0, x: -20 }}
@@ -91,14 +95,12 @@ export default function Amenities() {
            </motion.div>
         </div>
 
-        {/* THE GALLERY TRACK */}
         <motion.div style={{ x: smoothX }} className="flex gap-16 pl-[25vw] items-center">
           {amenities.map((item, i) => (
              <Card key={item.id} item={item} index={i} />
           ))}
         </motion.div>
         
-        {/* CUSTOM SCROLLBAR */}
         <div className="absolute bottom-12 left-20 right-20 h-[1px] bg-white/5">
            <motion.div 
              style={{ scaleX: scrollYProgress }} 
@@ -120,9 +122,8 @@ export default function Amenities() {
             </div>
          </div>
 
-         {/* Native Horizontal Scroll Container */}
          <div className="flex gap-4 overflow-x-auto pb-8 -mx-6 px-6 snap-x snap-mandatory scrollbar-hide">
-            {amenities.map((item, i) => (
+            {amenities.map((item) => (
                <div key={item.id} className="snap-center shrink-0 first:pl-0 last:pr-6">
                   <MobileCard item={item} />
                </div>
@@ -134,10 +135,10 @@ export default function Amenities() {
   );
 }
 
-// --- DESKTOP CARD ---
+// --- DESKTOP CARD (Wrapped in Link) ---
 function Card({ item, index }: { item: any, index: number }) {
   return (
-    <div className="group relative h-[65vh] w-[50vh] flex-shrink-0 cursor-pointer perspective-1000">
+    <Link href={item.href} className="block group relative h-[65vh] w-[50vh] flex-shrink-0 cursor-pointer perspective-1000">
       
       {/* Image Container */}
       <div className="relative h-full w-full overflow-hidden bg-[#050505] border border-white/5 group-hover:border-[#eebb4d]/30 transition-colors duration-500 shadow-2xl">
@@ -178,14 +179,14 @@ function Card({ item, index }: { item: any, index: number }) {
            </div>
          </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
-// --- NEW MOBILE CARD ---
+// --- MOBILE CARD (Wrapped in Link) ---
 function MobileCard({ item }: { item: any }) {
    return (
-      <div className="relative h-[450px] w-[85vw] rounded-sm overflow-hidden bg-[#050505] border border-white/10 shadow-xl">
+      <Link href={item.href} className="block relative h-[450px] w-[85vw] rounded-sm overflow-hidden bg-[#050505] border border-white/10 shadow-xl">
          <Image
             src={item.image}
             alt={item.title}
@@ -209,6 +210,6 @@ function MobileCard({ item }: { item: any }) {
          <div className="absolute top-4 right-4 text-4xl font-serif text-white/10">
             {item.id}
          </div>
-      </div>
+      </Link>
    );
 }

@@ -1,136 +1,150 @@
 "use client";
 
-import { motion, AnimatePresence, Variants } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 
-// Extend the window interface to avoid TypeScript errors
+interface LoaderProps {
+  onComplete: () => void;
+}
+
+// 1. Extend Window interface to avoid TypeScript errors
 declare global {
   interface Window {
-    hasShownHarleyLoader?: boolean;
+    harleyLoaderShown: boolean;
   }
 }
 
-export default function Loader({ onComplete }: { onComplete: () => void }) {
-  const [isFinished, setIsFinished] = useState(false);
-  const [shouldRender, setShouldRender] = useState(true);
+export default function Loader({ onComplete }: LoaderProps) {
+  const [isPresent, setIsPresent] = useState(true);
+  const [shouldRender, setShouldRender] = useState(true); // Extra state to prevent flash
 
   useEffect(() => {
-    // 1. Check a temporary window variable (Clears on refresh, Persists on navigation)
-    if (typeof window !== "undefined" && window.hasShownHarleyLoader) {
+    // 2. Check if we have already shown the loader in this "window" session
+    // (This variable survives navigation but is wiped on Refresh)
+    if (typeof window !== "undefined" && window.harleyLoaderShown) {
       setShouldRender(false);
       onComplete();
       return;
     }
 
-    // 2. Play Animation
+    // --- If we are here, it's a Refresh or First Load ---
+    
+    // Lock scroll
     document.body.style.overflow = "hidden";
     
+    // Run the animation timer
     const timer = setTimeout(() => {
-        setIsFinished(true);
-    }, 2500);
+      setIsPresent(false);
+      
+      // Mark as shown so we skip it next time we navigate back here
+      if (typeof window !== "undefined") {
+        window.harleyLoaderShown = true;
+      }
+
+      setTimeout(() => {
+        onComplete();
+        document.body.style.overflow = "unset";
+      }, 800); 
+    }, 3500);
 
     return () => {
+      document.body.style.overflow = "unset";
       clearTimeout(timer);
-      document.body.style.overflow = "auto";
     };
   }, [onComplete]);
 
-  const handleAnimationComplete = () => {
-    // 3. Mark as shown in the current window instance
-    if (typeof window !== "undefined") {
-      window.hasShownHarleyLoader = true;
-    }
-    
-    document.body.style.overflow = "auto";
-    onComplete();
-  };
-
+  // If we shouldn't render (navigation), return null immediately
   if (!shouldRender) return null;
 
-  // ... (Rest of your animation variants and JSX remain exactly the same)
-  const draw: Variants = {
-    hidden: { pathLength: 0, opacity: 0 },
-    visible: (i: number) => ({
-      pathLength: 1,
-      opacity: 1,
-      transition: {
-        pathLength: { delay: i * 0.2, type: "tween", ease: "easeInOut", duration: 2 },
-        opacity: { delay: i * 0.2, duration: 0.01 },
-      },
-    }),
-  };
-
-  const containerVariants: Variants = {
-    exit: {
-      y: "-100%",
-      transition: {
-        duration: 0.8,
-        ease: [0.76, 0, 0.24, 1] as const,
-        when: "afterChildren",
-      }
-    }
-  };
-
   return (
-    <AnimatePresence mode="wait" onExitComplete={handleAnimationComplete}>
-      {!isFinished && (
+    <AnimatePresence>
+      {isPresent && (
         <motion.div
-          key="loader"
-          variants={containerVariants}
-          initial={{ y: 0 }}
-          exit="exit"
-          className="fixed inset-0 z-[9999] bg-[#02120b] flex flex-col items-center justify-center p-4 will-change-transform"
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0, transition: { duration: 0.8, ease: "easeInOut" } }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black text-white"
         >
-          
-          <div className="absolute inset-0 opacity-[0.15] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
-
-          {/* THE LOGO CONTAINER */}
-          <div className="relative w-full max-w-[300px] md:max-w-lg h-48 md:h-64 flex items-center justify-center">
-            <svg
-              className="w-full h-full overflow-visible"
-              viewBox="0 0 800 500"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <g transform="translate(400, 250) scale(1.0)">
-                <motion.path
-                  d="M-100,-50 C-150,-100 0,-150 50,-50 C150,50 100,150 0,100 C-100,50 -150,150 -50,200 C50,250 150,200 200,100 C250,0 150,-100 50,-150 C-50,-200 -150,-150 -200,-50 C-250,50 -150,200 0,250"
-                  stroke="#eebb4d"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  variants={draw}
-                  initial="hidden"
-                  animate="visible"
-                  custom={0}
-                />
-                <motion.path
-                  d="M0,0 C-100,100 100,200 200,0 C300,-200 -200,-200 -100,0 C0,200 -300,100 -200,-100"
-                  stroke="#eebb4d"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  variants={draw}
-                  initial="hidden"
-                  animate="visible"
-                  custom={1}
-                />
-              </g>
+          <div className="relative flex items-center justify-center w-80 h-80 md:w-96 md:h-96">
+            
+            {/* --- 1. The Double Diamond Border Animation --- */}
+            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+              {/* Outer Border */}
+              <motion.rect
+                x="15" y="15" width="70" height="70"
+                rx="0"
+                fill="transparent"
+                stroke="white"
+                strokeWidth="0.8"
+                initial={{ pathLength: 0, rotate: 45, opacity: 0 }}
+                animate={{ pathLength: 1, rotate: 45, opacity: 1 }}
+                transition={{ duration: 1.5, ease: "easeInOut" }}
+                className="origin-center"
+              />
+              {/* Inner Border */}
+              <motion.rect
+                x="18" y="18" width="64" height="64"
+                rx="0"
+                fill="black"
+                stroke="white"
+                strokeWidth="0.5"
+                initial={{ pathLength: 0, rotate: 45, opacity: 0 }}
+                animate={{ pathLength: 1, rotate: 45, opacity: 1 }}
+                transition={{ duration: 1.5, ease: "easeInOut", delay: 0.2 }}
+                className="origin-center"
+              />
             </svg>
+
+            {/* --- 2. The Text Content --- */}
+            <div className="relative z-10 flex flex-col items-center justify-center text-center transform scale-90 md:scale-100">
+              
+              {/* "THE" */}
+              <motion.span
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.2, duration: 0.8 }}
+                className="font-serif text-xs md:text-sm tracking-widest mb-1"
+              >
+                THE
+              </motion.span>
+
+              {/* Top Separator Line */}
+              <motion.div
+                initial={{ width: 0, opacity: 0 }}
+                animate={{ width: "100%", opacity: 1 }}
+                transition={{ delay: 1.4, duration: 0.8 }}
+                className="h-[1px] bg-white w-32 mb-2"
+              />
+
+              {/* "HARLEY LOUNGE" */}
+              <motion.h1
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 1.6, duration: 1 }}
+                className="font-serif text-2xl md:text-3xl tracking-wide uppercase mb-2 px-4 whitespace-nowrap"
+              >
+                Harley Lounge
+              </motion.h1>
+
+              {/* Bottom Separator Line */}
+              <motion.div
+                initial={{ width: 0, opacity: 0 }}
+                animate={{ width: "100%", opacity: 1 }}
+                transition={{ delay: 1.4, duration: 0.8 }}
+                className="h-[1px] bg-white w-32 mb-2"
+              />
+
+              {/* "CONCIERGE" (Gold Text) */}
+              <motion.span
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 2.2, duration: 1 }}
+                style={{ color: "#C5A059" }} 
+                className="font-serif text-sm md:text-base font-semibold tracking-widest uppercase"
+              >
+                Concierge
+              </motion.span>
+            </div>
           </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.5, duration: 0.8, ease: "easeOut" }}
-            className="text-center -mt-8 md:-mt-4 relative z-10"
-          >
-            <h1 className="text-3xl md:text-5xl font-serif text-[#eae8dc] tracking-widest font-bold">
-              THE HARLEY
-            </h1>
-            <p className="text-[#eebb4d] text-[10px] md:text-xs font-sans tracking-[0.4em] md:tracking-[0.6em] mt-3 uppercase opacity-90">
-              Lounge & Concierge
-            </p>
-          </motion.div>
-
         </motion.div>
       )}
     </AnimatePresence>

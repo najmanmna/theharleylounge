@@ -9,10 +9,10 @@ import { Menu, X, ArrowRight } from "lucide-react";
 const navLinks = [
   { title: "The Sanctuary", href: "/#about", subtitle: "Our Story" },
   // UPDATED: Changed Title to "Concierge"
-  { title: "Concierge", href: "/facilities", subtitle: "Spaces & Services" }, 
+  { title: "Concierge", href: "/concierge", subtitle: "Spaces & Services" }, 
   { title: "Membership", href: "/#membership", subtitle: "Join the Club" },
   { title: "Events", href: "/events", subtitle: "Social Calendar" },
-  { title: "Contact", href: "/#contact", subtitle: "Get in Touch" },
+  { title: "Contact", href: "/contact", subtitle: "Get in Touch" },
 ];
 
 export default function Navbar() {

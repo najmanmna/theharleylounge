@@ -79,7 +79,7 @@ const handleMouseMove = (e: React.MouseEvent) => {
                 playsInline
                 className="object-cover w-full h-full opacity-50 brightness-[0.7] contrast-[1.1] saturate-[0.8] will-change-transform"
               >
-                <source src="/harley_lounge.mp4" type="video/mp4" />
+                <source src="/harley_final.mp4" type="video/mp4" />
               </m.video>
             </m.div>
           </AnimatePresence>
