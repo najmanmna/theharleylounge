@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { 
   useScroll, 
   useTransform, 
@@ -15,36 +15,49 @@ import {
 export default function Hero() {
   const containerRef = useRef(null);
   const [loopKey, setLoopKey] = useState(0);
+  const [isMobile, setIsMobile] = useState(true); // Default to true to prevent hydration mismatch
 
-  // 1. Scroll Parallax
+  // 1. Detect Mobile Once on Mount
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // 2. Scroll Parallax
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end start"],
   });
 
-  const textY = useTransform(scrollYProgress, [0, 1], ["0%", "60%"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const textY = useTransform(scrollYProgress, [0, 1], ["0%", "40%"]); // Reduced distance for smoother scroll
+  const opacity = useTransform(scrollYProgress, [0, 0.4], [1, 0]);
 
-  // 2. Mouse Parallax (Optimized for smoother feel)
+  // 3. Mouse Parallax (Optimized)
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  // Softer spring physics for a more "underwater" floating feel
-  const smoothX = useSpring(mouseX, { damping: 60, stiffness: 200 }); 
-  const smoothY = useSpring(mouseY, { damping: 60, stiffness: 200 });
+  // Stiff spring for responsive yet smooth feel
+  const smoothX = useSpring(mouseX, { damping: 50, stiffness: 400 }); 
+  const smoothY = useSpring(mouseY, { damping: 50, stiffness: 400 });
 
-const handleMouseMove = (e: React.MouseEvent) => {
-    // 1. Safety Check: Stop if we are on Server (SSR) OR on Mobile (< 768px)
-    if (typeof window === "undefined" || window.innerWidth < 768) return;
+  const handleMouseMove = (e: React.MouseEvent) => {
+    // Completely skip logic if mobile to save CPU
+    if (isMobile) return; 
 
-    // 2. Run logic only on Desktop
     const { clientX, clientY } = e;
     const { innerWidth, innerHeight } = window;
     
-    // Reduced movement range (-15 to 15) for subtlety
-    mouseX.set((clientX / innerWidth - 0.5) * -15);
-    mouseY.set((clientY / innerHeight - 0.5) * -15);
+    // Calculate percentage (-0.5 to 0.5)
+    const xPct = (clientX / innerWidth - 0.5);
+    const yPct = (clientY / innerHeight - 0.5);
+    
+    // Move range: 20px
+    mouseX.set(xPct * 20);
+    mouseY.set(yPct * 20);
   };
+
   const handleVideoEnd = () => {
     setLoopKey((prev) => prev + 1);
   };
@@ -69,22 +82,28 @@ const handleMouseMove = (e: React.MouseEvent) => {
               className="absolute inset-0 w-full h-full"
             >
               <m.video
+                // OPTIMIZATION: Only scale on Desktop. Mobile GPUs struggle to scale video.
                 initial={{ scale: 1.05 }}
-                animate={{ scale: 1.12 }} // Reduced zoom scale for better performance
+                animate={isMobile ? { scale: 1.05 } : { scale: 1.12 }} 
                 transition={{ duration: 15, ease: "linear" }}
+                
                 onEnded={handleVideoEnd}
                 autoPlay
                 muted
-                loop // Added loop as a fallback
+                loop
                 playsInline
-                className="object-cover w-full h-full opacity-50 brightness-[0.7] contrast-[1.1] saturate-[0.8] will-change-transform"
+                preload="auto"
+                // OPTIMIZATION: Removed filters (brightness/contrast) which kill mobile FPS
+                // Added will-change-transform to force GPU layer promotion
+                className="object-cover w-full h-full opacity-50 will-change-transform"
               >
                 <source src="/harley_final.mp4" type="video/mp4" />
               </m.video>
             </m.div>
           </AnimatePresence>
 
-          <div className="absolute inset-0 bg-[#061a12]/40 mix-blend-color pointer-events-none" />
+          {/* Overlays - Using opacity instead of mix-blend-mode for performance */}
+          <div className="absolute inset-0 bg-[#02120b]/30 pointer-events-none" />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#02120b]/20 to-[#02120b] pointer-events-none" />
           <div className="absolute inset-0 opacity-[0.04] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
         </div>
@@ -107,15 +126,17 @@ const handleMouseMove = (e: React.MouseEvent) => {
           {/* Main Title */}
           <m.h1 
             style={{ x: smoothX, y: smoothY }} 
-            initial={{ opacity: 0, filter: "blur(10px)" }}
-            animate={{ opacity: 1, filter: "blur(0px)" }}
-            transition={{ duration: 1.5, ease: "circOut" }}
+            // OPTIMIZATION: Removed heavy blur filter animation on enter
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }} // Custom easing for "premium" feel
             className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-serif text-[#eae8dc] mb-8 md:mb-10 tracking-tight leading-[1.1] md:leading-none will-change-transform"
           >
             The Harley <br />
             <span className="italic font-extralight text-white/20 relative inline-block">
               Lounge
-              <span className="absolute inset-0 blur-2xl bg-[#eebb4d]/10 -z-10" />
+              {/* Reduced blur radius for better mobile performance */}
+              <span className="absolute inset-0 blur-xl md:blur-2xl bg-[#eebb4d]/10 -z-10" />
             </span>
           </m.h1>
 

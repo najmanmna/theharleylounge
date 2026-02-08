@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion, useInView, Variants } from "framer-motion";
 
 const content = `We are not just a club. We are a sanctuary for the curious, the brave, and the bold. 
@@ -13,34 +13,45 @@ const highlights = ["sanctuary", "curious,", "brave,", "bold.", "silence.", "han
 export default function Manifesto() {
   const container = useRef(null);
   const isInView = useInView(container, { amount: 0.2, once: true });
+  const [isMobile, setIsMobile] = useState(true); // Default true for safety
+
+  // 1. Detect Mobile
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const words = content.split(" ");
 
-  // Added ': Variants' type to prevent inference errors
+  // 2. Optimized Variants
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.02,
-        delayChildren: 0.1
+        // No stagger on mobile = instant render
+        staggerChildren: isMobile ? 0 : 0.02,
+        delayChildren: isMobile ? 0 : 0.1
       }
     }
   };
 
-  // Added ': Variants' type here as well
   const wordVariants: Variants = {
     hidden: { 
-      opacity: 0.1, 
-      y: 10,
-      filter: "blur(4px)" 
+      // On mobile, start fully visible (no blur/translate) to save GPU
+      opacity: isMobile ? 1 : 0.1, 
+      y: isMobile ? 0 : 10,
+      filter: isMobile ? "blur(0px)" : "blur(4px)" 
     },
     visible: { 
       opacity: 1, 
       y: 0,
       filter: "blur(0px)",
       transition: {
-        duration: 0.5,
+        // Instant duration on mobile
+        duration: isMobile ? 0 : 0.5,
         ease: "easeOut"
       }
     }
@@ -49,7 +60,7 @@ export default function Manifesto() {
   return (
     <section 
       ref={container} 
-      className="relative min-h-[60vh] flex items-center justify-center py-24 px-6 md:px-20 overflow-hidden bg-[#02120b]"
+      className="relative min-h-[50vh] md:min-h-[60vh] flex items-center justify-center py-16 md:py-24 px-6 md:px-20 overflow-hidden bg-[#02120b]"
     >
       {/* Background Ambience */}
       <div className="absolute inset-0 pointer-events-none">
@@ -60,9 +71,10 @@ export default function Manifesto() {
       <div className="relative z-10 max-w-5xl mx-auto text-center md:text-left">
         <motion.p 
           variants={containerVariants}
-          initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
-          className="flex flex-wrap justify-center md:justify-start gap-x-2 md:gap-x-4 gap-y-2 md:gap-y-3 text-2xl md:text-5xl font-serif leading-[1.4] tracking-tight"
+          // OPTIMIZATION: On mobile, start 'visible' immediately to avoid flash of invisible text
+          initial={isMobile ? "visible" : "hidden"}
+          animate={isMobile ? "visible" : (isInView ? "visible" : "hidden")}
+          className="flex flex-wrap justify-center md:justify-start gap-x-1.5 md:gap-x-4 gap-y-1 md:gap-y-3 text-xl md:text-5xl font-serif leading-[1.4] tracking-tight"
         >
           {words.map((word, i) => {
             const isHighlight = highlights.includes(word.toLowerCase());
